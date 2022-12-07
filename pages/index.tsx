@@ -118,16 +118,6 @@ export default function Home() {
     editMessage(newMsgIndex, newMsg);
   }
 
-  // React.useEffect(() => {
-  //   if (settings.model === "stable-diffusion-768-v2-1") {
-  //     setSettings({
-  //       ...settings,
-  //       width: 768,
-  //       height: 768,
-  //     });
-  //   }
-  // }, [settings, settings.model]);
-
   return (
     <>
       <Head>
@@ -136,7 +126,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="flex flex-col h-screen w-screen pb-6 overflow-hidden">
+      <main className="flex flex-col max-h-screen w-screen pb-6 overflow-hidden">
         <div className="overflow-y-auto flex flex-col-reverse h-full w-full">
           <div className="flex flex-col gap-1 w-full">
             <div className="flex flex-col gap-2 mt-24 pb-6 mx-auto max-w-[60rem] p-2 lg:p-0 w-full">
