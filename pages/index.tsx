@@ -179,12 +179,14 @@ export default function Home() {
     });
   }
 
-  setTimeout(() => {
-    window.scrollTo({
-      behavior: "smooth",
-      top: document.body.scrollHeight,
-    });
-  }, 100);
+  React.useEffect(() => {
+    setTimeout(() => {
+      window.scrollTo({
+        behavior: "smooth",
+        top: document.body.scrollHeight,
+      });
+    }, 100);
+  }, [history]);
 
   return (
     <>
