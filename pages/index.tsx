@@ -190,7 +190,9 @@ export default function Home() {
   React.useEffect(() => {
     setTimeout(() => {
       if (mainConatiner.current && inputContainer.current) {
-        mainConatiner.current.style.marginBottom = `${inputContainer.current.offsetHeight}px`;
+        mainConatiner.current.style.marginBottom = `${
+          inputContainer.current.offsetHeight + 24
+        }px`;
       }
 
       window.scrollTo({
