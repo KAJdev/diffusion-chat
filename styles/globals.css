@@ -1,3 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
 html,
 body {
   padding: 0;
@@ -21,6 +26,23 @@ a {
   }
   body {
     color: white;
-    background: black;
+    background: rgb(44, 44, 44);
   }
 }
+
+/* style the scrollbar */
+::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+::-webkit-scrollbar-track {
+  background: #242424;
+  border-radius: 0.5rem;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(59, 59, 59);
+  border-radius: 0.5rem;
+}
+
+
