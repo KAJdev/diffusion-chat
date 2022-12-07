@@ -139,6 +139,12 @@ export default function Home() {
     if (!res.ok) {
       newMsg.error = "Something went wrong";
       newMsg.loading = false;
+      newMsg.buttons = [
+        {
+          text: "Retry",
+          id: "regenerate",
+        },
+      ];
       editMessage(newMsgIndex, newMsg);
       return;
     }
