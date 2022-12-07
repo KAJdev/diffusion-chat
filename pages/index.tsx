@@ -14,6 +14,13 @@ interface Message {
   prompt?: string;
   loading?: boolean;
   settings?: Settings;
+  buttons?: Button[];
+  error?: string;
+}
+
+interface Button {
+  text: string;
+  id: string;
 }
 
 interface Settings {
@@ -94,24 +101,25 @@ export default function Home() {
     });
   }
 
-  async function makeImage() {
-    if (!prompt) return;
+  async function makeImage(overridePrompt?: string) {
+    if (!prompt && !overridePrompt) return;
 
     setPrompt("");
     setSettingsOpen(false);
 
     addToHistory({
       type: "you",
-      prompt,
+      prompt: prompt || overridePrompt,
     });
 
     await new Promise((r) => setTimeout(r, 400));
     const newMsg: Message = {
       type: "stable diffusion",
-      prompt,
+      prompt: prompt || overridePrompt,
       images: [],
       loading: true,
       settings,
+      buttons: [],
     };
     const newMsgIndex = addToHistory(newMsg);
 
@@ -121,13 +129,20 @@ export default function Home() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        prompt,
+        prompt: prompt || overridePrompt,
         model: settings.model,
         width: settings.width,
         height: settings.height,
         count: settings.count,
       }),
     });
+
+    if (!res.ok) {
+      newMsg.error = "Something went wrong";
+      newMsg.loading = false;
+      editMessage(newMsgIndex, newMsg);
+      return;
+    }
 
     const data = await res.json();
 
@@ -145,10 +160,21 @@ export default function Home() {
     }
 
     newMsg.loading = false;
+    newMsg.buttons = [
+      {
+        text: "Regenerate",
+        id: "regenerate",
+      },
+      {
+        text: "Save",
+        id: "save",
+      },
+    ];
+    console.log("new msg", newMsg);
     editMessage(newMsgIndex, newMsg);
     sendNotification({
       icon: newMsg.images![0].image,
-      body: prompt,
+      body: prompt || overridePrompt,
       tag: "chat-diffusion",
       requireInteraction: false,
     });
@@ -183,7 +209,12 @@ export default function Home() {
               <div className="border-b border-white/10" />
             </div>
             {history.map((message, i) => (
-              <Message key={i} message={message} scrollRef={scrollRef} />
+              <Message
+                key={i}
+                message={message}
+                scrollRef={scrollRef}
+                makeImage={makeImage}
+              />
             ))}
           </div>
         </div>
@@ -233,7 +264,7 @@ export default function Home() {
               <div className="h-[1.5rem] w-[1px] bg-white/10 rounded" />
               <button
                 className={`${prompt ? "cursor-pointer" : "cursor-default"}`}
-                onClick={makeImage}
+                onClick={() => makeImage()}
               >
                 <Send
                   className={`text-white rotate-45 ${
@@ -254,9 +285,11 @@ export default function Home() {
 function Message({
   message,
   scrollRef,
+  makeImage,
 }: {
   message: Message;
   scrollRef: React.RefObject<HTMLDivElement>;
+  makeImage: (overridePrompt?: string) => void;
 }) {
   const [selectedImage, setSelectedImage] = React.useState(-1);
 
@@ -288,18 +321,30 @@ function Message({
                   alt="Generated image"
                   className={`rounded mt-2 duration-300 hover:opacity-75 cursor-pointer`}
                   style={{
-                    maxHeight: selectedImage === i ? "25rem" : "10rem",
-                    maxWidth: selectedImage === i ? "25rem" : "10rem",
+                    maxHeight:
+                      selectedImage === i || message.images?.length === 1
+                        ? "25rem"
+                        : "10rem",
+                    maxWidth:
+                      selectedImage === i || message.images?.length === 1
+                        ? "25rem"
+                        : "10rem",
                     height:
-                      selectedImage > -1 && selectedImage !== i
+                      selectedImage > -1 &&
+                      selectedImage !== i &&
+                      message.images?.length !== 1
                         ? "0"
                         : `${message.settings?.height}px`,
                     width:
-                      selectedImage > -1 && selectedImage !== i
+                      selectedImage > -1 &&
+                      selectedImage !== i &&
+                      message.images?.length !== 1
                         ? "0"
                         : `${message.settings?.width}px`,
                   }}
                   onClick={() => {
+                    if (message.images?.length === 1) return;
+
                     if (selectedImage === i) {
                       setSelectedImage(-1);
                     } else {
@@ -317,7 +362,9 @@ function Message({
             </div>
           )}
           {message.prompt && message.type === "you" && (
-            <p className="text-white/75">{message.prompt}</p>
+            <p className="text-white/75 text-right break-all whitespace-pre-wrap">
+              {message.prompt}
+            </p>
           )}
           {message.loading && message.images && message.images.length === 0 && (
             <div className="flex flex-row gap-1 my-3">
@@ -326,6 +373,31 @@ function Message({
               <div className="animate-pulse bg-white/25 delay-150 w-3 h-3 rounded-full" />
             </div>
           )}
+          {message.buttons && (
+            <div className="flex flex-row gap-2 my-2">
+              {message.buttons.map((btn, i) => (
+                <button
+                  key={i}
+                  className="border-white/10 border rounded px-3 py-1 text-white/75 font-semibold hover:bg-white/20 hover:text-white/100 duration-200"
+                  onClick={() => {
+                    if (btn.id == "regenerate") {
+                      makeImage(message.prompt);
+                    } else if (btn.id == "save") {
+                      message.images?.forEach((image) => {
+                        const link = document.createElement("a");
+                        link.href = image.image;
+                        link.download = `image-${new Date().getTime()}.png`;
+                        link.click();
+                      });
+                    }
+                  }}
+                >
+                  {btn.text}
+                </button>
+              ))}
+            </div>
+          )}
+          {message.error && <p className="text-red-500">{message.error}</p>}
         </div>
       </div>
     </>
