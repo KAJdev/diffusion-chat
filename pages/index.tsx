@@ -213,7 +213,7 @@ export default function Home() {
           <div className="p-3 rounded-full bg-white/10 w-fit">
             <MessageCircle className="text-white/75" size={32} />
           </div>
-          <h1 className="text-4xl font-bold">Welcome to Chat Diffusion</h1>
+          <h1 className="text-4xl font-bold">Welcome to #diffusion-chat</h1>
           <h2 className="text-white/75 text-xl mt-2">
             Talk directly to latent space.
           </h2>
@@ -324,7 +324,9 @@ function Message({
             </h1>
           </div>
           {message.images && message.settings && message.images.length > 0 && (
-            <div className={`flex flex-row gap-2 overflow-hidden flex-wrap`}>
+            <div
+              className={`flex flex-row gap-2 overflow-hidden flex-wrap max-w-full`}
+            >
               {message.images.map((image, i) => (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
