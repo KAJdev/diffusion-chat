@@ -9,6 +9,10 @@ body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  color-scheme: dark;
+  color: white;
+  background: rgb(44, 44, 44);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 a {
@@ -18,16 +22,6 @@ a {
 
 * {
   box-sizing: border-box;
-}
-
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
-  body {
-    color: white;
-    background: rgb(44, 44, 44);
-  }
 }
 
 /* style the scrollbar */

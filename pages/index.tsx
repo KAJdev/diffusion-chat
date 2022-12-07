@@ -153,7 +153,7 @@ export default function Home() {
             ))}
           </div>
         </div>
-        <div className="w-full mx-auto max-w-[60.75rem] pr-[0.5rem] relative">
+        <div className="w-full mx-auto max-w-[60.75rem] pr-[0.5rem] lg:pl-0 pl-[0.5rem] relative">
           <Settings
             open={settingsOpen}
             settings={settings}
@@ -275,9 +275,9 @@ function Message({ message }: { message: Message }) {
           )}
           {message.loading && message.images && message.images.length === 0 && (
             <div className="flex flex-row gap-1 my-3">
-              <div className="animate-pulse bg-white/75 w-3 h-3 rounded-full" />
-              <div className="animate-pulse bg-white/75 w-3 h-3 rounded-full" />
-              <div className="animate-pulse bg-white/75 w-3 h-3 rounded-full" />
+              <div className="animate-pulse bg-white/25 w-3 h-3 rounded-full" />
+              <div className="animate-pulse bg-white/25 delay-75 w-3 h-3 rounded-full" />
+              <div className="animate-pulse bg-white/25 delay-150 w-3 h-3 rounded-full" />
             </div>
           )}
         </div>
@@ -298,7 +298,9 @@ function Settings({
   return (
     <div
       className={`absolute bottom-[3.75rem] duration-200 flex flex-col gap-4 p-3 w-80 bg-[#373737] rounded-lg drop-shadow-md ${
-        open ? "block right-[0.5rem]" : "hidden opacity-0 right-[0.75rem]"
+        open
+          ? "block right-[0.75rem] lg:right-[0.5rem]"
+          : "hidden opacity-0 right-[0.75rem]"
       }`}
     >
       <div className="flex flex-col gap-1">
