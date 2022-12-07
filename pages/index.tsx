@@ -23,6 +23,31 @@ interface Settings {
     | "stable-diffusion-768-v2-1";
   width: number;
   height: number;
+  count: number;
+}
+
+function sendNotification(options: NotificationOptions) {
+  if (document.hasFocus()) return;
+
+  if (!("Notification" in window)) {
+    console.log("This browser does not support desktop notification");
+  } else if (Notification.permission === "granted") {
+    new Notification("New message from Chat Diffusion", options);
+  } else if (Notification.permission !== "denied") {
+    Notification.requestPermission().then((permission) => {
+      if (permission === "granted") {
+        new Notification("New message from Chat Diffusion", options);
+      }
+    });
+  }
+}
+
+function requestNotificationPermission() {
+  if (!("Notification" in window)) {
+    console.log("This browser does not support desktop notification");
+  } else if (Notification.permission === "denied") {
+    Notification.requestPermission();
+  }
 }
 
 const b64toBlob = (b64Data: string, contentType = "") => {
@@ -36,12 +61,14 @@ const b64toBlob = (b64Data: string, contentType = "") => {
 export default function Home() {
   const [prompt, setPrompt] = React.useState<string>("");
   const [history, setHistory] = React.useState<Message[]>([]);
+  const scrollRef = React.useRef<HTMLDivElement>(null);
 
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [settings, setSettings] = React.useState<Settings>({
     model: "stable-diffusion-v1-5",
     width: 512,
     height: 512,
+    count: 4,
   });
 
   function addToHistory(message: Message): number {
@@ -88,6 +115,8 @@ export default function Home() {
     };
     const newMsgIndex = addToHistory(newMsg);
 
+    requestNotificationPermission();
+
     const res = await fetch("/api/image", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -96,6 +125,7 @@ export default function Home() {
         model: settings.model,
         width: settings.width,
         height: settings.height,
+        count: settings.count,
       }),
     });
 
@@ -116,6 +146,16 @@ export default function Home() {
 
     newMsg.loading = false;
     editMessage(newMsgIndex, newMsg);
+    sendNotification({
+      icon: newMsg.images![0].image,
+      body: prompt,
+      tag: "chat-diffusion",
+      requireInteraction: false,
+    });
+  }
+
+  if (scrollRef.current) {
+    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }
 
   return (
@@ -126,8 +166,11 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="flex flex-col max-h-screen w-screen pb-6 overflow-hidden">
-        <div className="overflow-y-auto flex flex-col-reverse h-full w-full">
+      <main className="flex flex-col h-screen w-screen pb-6 overflow-hidden">
+        <div
+          className="overflow-y-auto flex flex-col-reverse h-full w-full"
+          ref={scrollRef}
+        >
           <div className="flex flex-col gap-1 w-full">
             <div className="flex flex-col gap-2 mt-24 pb-6 mx-auto max-w-[60rem] p-2 lg:p-0 w-full">
               <div className="p-3 rounded-full bg-white/10 w-fit">
@@ -140,7 +183,7 @@ export default function Home() {
               <div className="border-b border-white/10" />
             </div>
             {history.map((message, i) => (
-              <Message key={i} message={message} />
+              <Message key={i} message={message} scrollRef={scrollRef} />
             ))}
           </div>
         </div>
@@ -208,7 +251,13 @@ export default function Home() {
   );
 }
 
-function Message({ message }: { message: Message }) {
+function Message({
+  message,
+  scrollRef,
+}: {
+  message: Message;
+  scrollRef: React.RefObject<HTMLDivElement>;
+}) {
   const [selectedImage, setSelectedImage] = React.useState(-1);
 
   return (
@@ -257,6 +306,12 @@ function Message({ message }: { message: Message }) {
                       setSelectedImage(i);
                     }
                   }}
+                  onLoad={() => {
+                    if (scrollRef.current) {
+                      scrollRef.current.scrollTop =
+                        scrollRef.current.scrollHeight;
+                    }
+                  }}
                 />
               ))}
             </div>
@@ -294,30 +349,6 @@ function Settings({
           : "hidden opacity-0 right-[0.75rem]"
       }`}
     >
-      <div className="flex flex-col gap-1">
-        <div className="flex flex-row justify-between">
-          <h1 className="text-white text-sm font-semibold">Size</h1>
-          <p className="text-white/50 text-sm">
-            {settings.width}x{settings.height}
-          </p>
-        </div>
-        <input
-          type="range"
-          className="w-full h-2 bg-white/10 rounded-full appearance-none"
-          min={settings.model === "stable-diffusion-768-v2-1" ? 768 : 512}
-          max={1024}
-          step={64}
-          value={settings.width}
-          onChange={(e) => {
-            setSettings({
-              ...settings,
-              width: parseInt(e.target.value),
-              height: parseInt(e.target.value),
-            });
-          }}
-        />
-      </div>
-
       <div className="flex flex-col gap-1">
         <div className="flex flex-row justify-between">
           <h1 className="text-white text-sm font-semibold">Model</h1>
@@ -360,6 +391,51 @@ function Settings({
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <div className="flex flex-row justify-between">
+          <h1 className="text-white text-sm font-semibold">Size</h1>
+          <p className="text-white/50 text-sm">
+            {settings.width}x{settings.height}
+          </p>
+        </div>
+        <input
+          type="range"
+          className="w-full h-2 bg-white/10 rounded-full appearance-none"
+          min={settings.model === "stable-diffusion-768-v2-1" ? 768 : 512}
+          max={1024}
+          step={64}
+          value={settings.width}
+          onChange={(e) => {
+            setSettings({
+              ...settings,
+              width: parseInt(e.target.value),
+              height: parseInt(e.target.value),
+            });
+          }}
+        />
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <div className="flex flex-row justify-between">
+          <h1 className="text-white text-sm font-semibold">Image Count</h1>
+          <p className="text-white/50 text-sm">{settings.count}</p>
+        </div>
+        <input
+          type="range"
+          className="w-full h-2 bg-white/10 rounded-full appearance-none"
+          min={1}
+          max={10}
+          step={1}
+          value={settings.count}
+          onChange={(e) => {
+            setSettings({
+              ...settings,
+              count: parseInt(e.target.value),
+            });
+          }}
+        />
       </div>
     </div>
   );

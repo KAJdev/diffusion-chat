@@ -45,7 +45,7 @@ export default async function handler(
             weight: 1,
           },
         ],
-        samples: 4,
+        samples: req.body.count || 1,
         sampler: "K_DPMPP_2S_ANCESTRAL",
         clip_guidance_preset: "FAST_BLUE",
         width: req.body.width || 512,
