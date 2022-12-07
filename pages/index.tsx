@@ -363,7 +363,7 @@ function Message({
               <div className="animate-pulse bg-white/25 delay-150 w-3 h-3 rounded-full" />
             </div>
           )}
-          {message.buttons && (
+          {message.buttons && message.buttons.length > 0 && (
             <div className="flex flex-row gap-2 my-2">
               {message.buttons.map((btn, i) => (
                 <button
