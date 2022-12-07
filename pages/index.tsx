@@ -68,7 +68,6 @@ const b64toBlob = (b64Data: string, contentType = "") => {
 export default function Home() {
   const [prompt, setPrompt] = React.useState<string>("");
   const [history, setHistory] = React.useState<Message[]>([]);
-  const scrollRef = React.useRef<HTMLDivElement>(null);
 
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [settings, setSettings] = React.useState<Settings>({
@@ -180,9 +179,12 @@ export default function Home() {
     });
   }
 
-  if (scrollRef.current) {
-    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }
+  setTimeout(() => {
+    window.scrollTo({
+      behavior: "smooth",
+      top: document.body.scrollHeight,
+    });
+  }, 100);
 
   return (
     <>
@@ -192,39 +194,29 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="flex flex-col h-screen w-screen pb-6 overflow-hidden">
-        <div
-          className="overflow-y-auto flex flex-col-reverse h-full w-full"
-          ref={scrollRef}
-        >
-          <div className="flex flex-col gap-1 w-full">
-            <div className="flex flex-col gap-2 mt-24 pb-6 mx-auto max-w-[60rem] p-2 lg:p-0 w-full">
-              <div className="p-3 rounded-full bg-white/10 w-fit">
-                <MessageCircle className="text-white/75" size={32} />
-              </div>
-              <h1 className="text-4xl font-bold">Welcome to Chat Diffusion</h1>
-              <h2 className="text-white/75 text-xl mt-2">
-                Talk directly to latent space.
-              </h2>
-              <div className="border-b border-white/10" />
-            </div>
-            {history.map((message, i) => (
-              <Message
-                key={i}
-                message={message}
-                scrollRef={scrollRef}
-                makeImage={makeImage}
-              />
-            ))}
+      <main className="flex flex-col gap-1 w-full mb-[5rem]">
+        <div className="flex flex-col gap-2 mt-24 pb-6 mx-auto max-w-[60rem] p-2 lg:p-0 w-full">
+          <div className="p-3 rounded-full bg-white/10 w-fit">
+            <MessageCircle className="text-white/75" size={32} />
           </div>
+          <h1 className="text-4xl font-bold">Welcome to Chat Diffusion</h1>
+          <h2 className="text-white/75 text-xl mt-2">
+            Talk directly to latent space.
+          </h2>
+          <div className="border-b border-white/10" />
         </div>
+        {history.map((message, i) => (
+          <Message key={i} message={message} makeImage={makeImage} />
+        ))}
+      </main>
+      <div className="fixed bottom-0 w-screen bg-[#2c2c2c]">
         <div className="w-full mx-auto max-w-[60.75rem] pr-[0.5rem] lg:pl-0 pl-[0.5rem] relative">
           <Settings
             open={settingsOpen}
             settings={settings}
             setSettings={setSettings}
           />
-          <div className="px-4 py-3 mt-2 rounded-lg bg-white/10 flex flex-row items-center w-full">
+          <div className="px-4 py-3 mt-2 rounded-lg bg-[#424242] flex flex-row items-center w-full mb-6">
             <input
               type="text"
               className="w-full text-lg text-white/75 placeholder:text-white/30 outline-none focus:border-none bg-transparent"
@@ -277,18 +269,16 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </main>
+      </div>
     </>
   );
 }
 
 function Message({
   message,
-  scrollRef,
   makeImage,
 }: {
   message: Message;
-  scrollRef: React.RefObject<HTMLDivElement>;
   makeImage: (overridePrompt?: string) => void;
 }) {
   const [selectedImage, setSelectedImage] = React.useState(-1);
@@ -352,10 +342,10 @@ function Message({
                     }
                   }}
                   onLoad={() => {
-                    if (scrollRef.current) {
-                      scrollRef.current.scrollTop =
-                        scrollRef.current.scrollHeight;
-                    }
+                    window.scrollTo({
+                      behavior: "smooth",
+                      top: document.body.scrollHeight,
+                    });
                   }}
                 />
               ))}
