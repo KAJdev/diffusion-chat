@@ -68,6 +68,8 @@ const b64toBlob = (b64Data: string, contentType = "") => {
 export default function Home() {
   const [prompt, setPrompt] = React.useState<string>("");
   const [history, setHistory] = React.useState<Message[]>([]);
+  const inputContainer = React.useRef<HTMLDivElement>(null);
+  const mainConatiner = React.useRef<HTMLDivElement>(null);
 
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [settings, setSettings] = React.useState<Settings>({
@@ -187,6 +189,10 @@ export default function Home() {
 
   React.useEffect(() => {
     setTimeout(() => {
+      if (mainConatiner.current && inputContainer.current) {
+        mainConatiner.current.style.marginBottom = `${inputContainer.current.offsetHeight}px`;
+      }
+
       window.scrollTo({
         behavior: "smooth",
         top: document.body.scrollHeight,
@@ -202,7 +208,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="flex flex-col gap-1 w-full mb-[5rem]">
+      <main className="flex flex-col gap-1 w-full" ref={mainConatiner}>
         <div className="flex flex-col gap-2 mt-24 pb-6 mx-auto max-w-[60rem] p-2 lg:p-0 w-full">
           <div className="p-3 rounded-full bg-white/10 w-fit">
             <MessageCircle className="text-white/75" size={32} />
@@ -217,7 +223,10 @@ export default function Home() {
           <Message key={i} message={message} makeImage={makeImage} />
         ))}
       </main>
-      <div className="fixed bottom-0 w-screen bg-[#2c2c2c]">
+      <div
+        className="fixed bottom-0 w-screen bg-[#2c2c2c]"
+        ref={inputContainer}
+      >
         <div className="w-full mx-auto max-w-[60.75rem] pr-[0.5rem] lg:pl-0 pl-[0.5rem] relative">
           <Settings
             open={settingsOpen}
