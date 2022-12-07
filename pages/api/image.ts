@@ -54,6 +54,8 @@ export default async function handler(
     }
   );
 
+  console.log(response.headers);
+
   const data = await response.json();
   res.status(200).json(data);
 }

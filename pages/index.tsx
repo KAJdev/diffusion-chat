@@ -227,13 +227,36 @@ export default function Home() {
         className="fixed bottom-0 w-screen bg-[#2c2c2c]"
         ref={inputContainer}
       >
+        <div
+          className={`${
+            !prompt && history.length < 1 ? "" : ""
+          } relative w-full mx-auto max-w-[60.75rem]`}
+        >
+          <div
+            className={`absolute duration-200 ${
+              !prompt && history.length % 2 < 1 && history.length < 10
+                ? "-bottom-[1.5rem]"
+                : "-bottom-[3.75rem]"
+            } pr-[0.5rem] w-full lg:pl-0 pl-[0.5rem]`}
+          >
+            <div className="bg-[#272727] rounded-lg w-full pb-5 px-4 pt-1.5 text-white/75 text-sm">
+              {"Don't know what to say? "}{" "}
+              <span
+                className="text-blue-400 hover:underline cursor-pointer"
+                onClick={() => setPrompt(suprisePrompt())}
+              >
+                Suprise Me!
+              </span>
+            </div>
+          </div>
+        </div>
         <div className="w-full mx-auto max-w-[60.75rem] pr-[0.5rem] lg:pl-0 pl-[0.5rem] relative">
           <Settings
             open={settingsOpen}
             settings={settings}
             setSettings={setSettings}
           />
-          <div className="px-4 py-3 mt-2 rounded-lg bg-[#424242] flex flex-row items-center w-full mb-6">
+          <div className="px-4 py-3 mt-2 z-10 rounded-lg bg-[#424242] flex flex-row items-center w-full mb-6">
             <input
               type="text"
               className="w-full text-lg text-white/75 placeholder:text-white/30 outline-none focus:border-none bg-transparent"
@@ -525,4 +548,165 @@ function Settings({
       </div>
     </div>
   );
+}
+
+const templates = [
+  "a {noun} {gerund} by {artist}",
+  "{adjective} {noun} {gerund} by {artist}",
+  "{adjective} {noun} {gerund} {adverb} by {artist}",
+  "{adjective} {noun} {gerund} {adverb} {adjective} {noun} {gerund} {adverb} by {artist}",
+  "a {adjective} {noun} {gerund} {adverb} by {artist}",
+];
+
+const nouns = [
+  "dog",
+  "cat",
+  "bird",
+  "fish",
+  "person",
+  "wizard",
+  "witch",
+  "dragon",
+  "unicorn",
+  "robot",
+  "alien",
+  "monster",
+  "goblin",
+  "elf",
+  "dwarf",
+  "orc",
+  "troll",
+  "giant",
+  "golem",
+  "demon",
+  "angel",
+  "ghost",
+  "vampire",
+  "werewolf",
+  "zombie",
+  "skeleton",
+];
+
+const gerunds = [
+  "running",
+  "walking",
+  "flying",
+  "swimming",
+  "singing",
+  "dancing",
+  "playing",
+  "fighting",
+  "hiding",
+  "eating",
+  "sleeping",
+  "drinking",
+  "smoking",
+  "crying",
+  "laughing",
+  "screaming",
+  "yelling",
+  "reading",
+  "writing",
+  "drawing",
+  "painting",
+  "jumping",
+  "hopping",
+  "skipping",
+];
+
+const adjectives = [
+  "happy",
+  "sad",
+  "angry",
+  "scared",
+  "confused",
+  "confident",
+  "crazy",
+  "silly",
+  "funny",
+  "weird",
+  "strange",
+  "odd",
+  "boring",
+  "exciting",
+  "amazing",
+  "beautiful",
+  "ugly",
+  "cute",
+  "adorable",
+  "handsome",
+  "pretty",
+  "smart",
+  "dumb",
+  "stupid",
+  "clever",
+  "brave",
+  "shy",
+  "quiet",
+  "loud",
+  "fast",
+  "slow",
+  "strong",
+  "weak",
+  "tall",
+  "short",
+  "fat",
+  "skinny",
+];
+
+const adverbs = [
+  "quickly",
+  "slowly",
+  "happily",
+  "sadly",
+  "angrily",
+  "scaredly",
+  "confusedly",
+  "confidently",
+  "crazily",
+  "sillyly",
+  "funnily",
+  "weirdly",
+  "strangely",
+  "oddly",
+  "boringly",
+  "excitingly",
+  "amazingly",
+  "beautifully",
+  "cutely",
+  "adorably",
+  "handsomely",
+  "prettyly",
+  "smartly",
+];
+
+const artists = [
+  "A-1 Pictures",
+  "Alvar Aalto",
+  "Annie Leibovitz",
+  "Antoni Gaudí",
+  "Antonio Gaudí",
+  "Antonio López García",
+  "Ansel Adams",
+  "Ansel Easton Adams",
+  "Tyler Edlin",
+  "Temmie Chang",
+  "Terry Gilliam",
+  "Terry Pratchett",
+  "Terry Pratchett and Neil Gaiman",
+  "Terry Pratchett and Stephen Baxter",
+  "Ian Mcewan",
+];
+
+function suprisePrompt(): string {
+  const template = templates[Math.floor(Math.random() * templates.length)];
+  return template
+    .replace(/{noun}/g, nouns[Math.floor(Math.random() * nouns.length)])
+    .replace(/{gerund}/g, gerunds[Math.floor(Math.random() * gerunds.length)])
+    .replace(
+      /{adjective}/g,
+      adjectives[Math.floor(Math.random() * adjectives.length)]
+    )
+    .replace(/{adverb}/g, adverbs[Math.floor(Math.random() * adverbs.length)])
+    .replace(/{artist}/g, artists[Math.floor(Math.random() * artists.length)]);
 }
