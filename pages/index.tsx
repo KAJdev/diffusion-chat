@@ -139,7 +139,7 @@ export default function Home() {
       <main className="flex flex-col h-screen w-screen pb-6">
         <div className="overflow-y-auto flex flex-col-reverse h-full w-full">
           <div className="flex flex-col gap-1 w-full">
-            <div className="flex flex-col gap-2 mt-24 border-b border-white/10 pb-6 mx-auto max-w-[60rem] w-full">
+            <div className="flex flex-col gap-2 mt-24 pb-6 mx-auto max-w-[60rem] p-2 lg:p-0 w-full">
               <div className="p-3 rounded-full bg-white/10 w-fit">
                 <MessageCircle className="text-white/75" size={32} />
               </div>
@@ -147,6 +147,7 @@ export default function Home() {
               <h2 className="text-white/75 text-xl mt-2">
                 Talk directly to latent space.
               </h2>
+              <div className="border-b border-white/10" />
             </div>
             {history.map((message, i) => (
               <Message key={i} message={message} />
