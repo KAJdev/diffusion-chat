@@ -556,7 +556,6 @@ const templates = [
   "a {noun} {gerund} by {artist}",
   "{adjective} {noun} {gerund} by {artist}",
   "{adjective} {noun} {gerund} {adverb} by {artist}",
-  "{adjective} {noun} {gerund} {adverb} {adjective} {noun} {gerund} {adverb} by {artist}",
   "a {adjective} {noun} {gerund} {adverb} by {artist}",
 ];
 
