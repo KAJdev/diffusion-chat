@@ -3,6 +3,9 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 interface Data {
   prompt: string;
+  model: string;
+  width: number;
+  height: number;
 }
 
 interface Error {
@@ -26,7 +29,7 @@ export default async function handler(
   // make request to image api and return data
   const response = await fetch(
     `https://api.stability.ai/v1alpha/generation/${
-      req.query.engine || "stable-diffusion-v1-5"
+      req.body.model || "stable-diffusion-v1-5"
     }/text-to-image`,
     {
       method: "POST",
@@ -45,6 +48,8 @@ export default async function handler(
         samples: 4,
         sampler: "K_DPMPP_2S_ANCESTRAL",
         clip_guidance_preset: "FAST_BLUE",
+        width: req.body.width || 512,
+        height: req.body.height || 512,
       }),
     }
   );

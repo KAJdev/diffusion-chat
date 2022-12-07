@@ -1,13 +1,28 @@
 import Head from "next/head";
-import { MessageCircle, Send } from "lucide-react";
+import { MessageCircle, Send, Settings2 } from "lucide-react";
 import React from "react";
+
+interface Artifact {
+  image: string;
+  seed: number;
+}
 
 interface Message {
   type: "you" | "stable diffusion";
   timestamp?: number;
-  images?: string[];
+  images?: Artifact[];
   prompt?: string;
   loading?: boolean;
+  settings?: Settings;
+}
+
+interface Settings {
+  model:
+    | "stable-diffusion-v1-5"
+    | "stable-diffusion-512-v2-1"
+    | "stable-diffusion-768-v2-1";
+  width: number;
+  height: number;
 }
 
 const b64toBlob = (b64Data: string, contentType = "") => {
@@ -21,6 +36,13 @@ const b64toBlob = (b64Data: string, contentType = "") => {
 export default function Home() {
   const [prompt, setPrompt] = React.useState<string>("");
   const [history, setHistory] = React.useState<Message[]>([]);
+
+  const [settingsOpen, setSettingsOpen] = React.useState(false);
+  const [settings, setSettings] = React.useState<Settings>({
+    model: "stable-diffusion-v1-5",
+    width: 512,
+    height: 512,
+  });
 
   function addToHistory(message: Message): number {
     setHistory((prev) => [
@@ -49,6 +71,7 @@ export default function Home() {
     if (!prompt) return;
 
     setPrompt("");
+    setSettingsOpen(false);
 
     addToHistory({
       type: "you",
@@ -61,13 +84,19 @@ export default function Home() {
       prompt,
       images: [],
       loading: true,
+      settings,
     };
     const newMsgIndex = addToHistory(newMsg);
 
     const res = await fetch("/api/image", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt }),
+      body: JSON.stringify({
+        prompt,
+        model: settings.model,
+        width: settings.width,
+        height: settings.height,
+      }),
     });
 
     const data = await res.json();
@@ -79,12 +108,25 @@ export default function Home() {
       // turn the blob into a url
       const url = URL.createObjectURL(blob);
 
-      newMsg.images!.push(url);
+      newMsg.images!.push({
+        image: url,
+        seed: artifact.seed,
+      });
     }
 
     newMsg.loading = false;
     editMessage(newMsgIndex, newMsg);
   }
+
+  // React.useEffect(() => {
+  //   if (settings.model === "stable-diffusion-768-v2-1") {
+  //     setSettings({
+  //       ...settings,
+  //       width: 768,
+  //       height: 768,
+  //     });
+  //   }
+  // }, [settings, settings.model]);
 
   return (
     <>
@@ -94,10 +136,10 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="mx-auto max-w-[60rem] flex flex-col h-screen w-screen p-6">
+      <main className="flex flex-col h-screen w-screen pb-6">
         <div className="overflow-y-auto flex flex-col-reverse h-full w-full">
-          <div className="flex pr-2 flex-col gap-1 w-full">
-            <div className="flex flex-col gap-2 mt-24 border-b border-white/10 pb-6">
+          <div className="flex flex-col gap-1 w-full">
+            <div className="flex flex-col gap-2 mt-24 border-b border-white/10 pb-6 mx-auto max-w-[60rem] w-full">
               <div className="p-3 rounded-full bg-white/10 w-fit">
                 <MessageCircle className="text-white/75" size={32} />
               </div>
@@ -111,11 +153,16 @@ export default function Home() {
             ))}
           </div>
         </div>
-        <div>
-          <div className="w-full px-4 py-3 mt-2 rounded-lg bg-white/10 flex flex-row items-center">
+        <div className="w-full mx-auto max-w-[60.75rem] pr-[0.5rem] relative">
+          <Settings
+            open={settingsOpen}
+            settings={settings}
+            setSettings={setSettings}
+          />
+          <div className="px-4 py-3 mt-2 rounded-lg bg-white/10 flex flex-row items-center w-full">
             <input
               type="text"
-              className="w-full text-lg text-white/75 placeholder:text-white/30 outline-none bg-transparent"
+              className="w-full text-lg text-white/75 placeholder:text-white/30 outline-none focus:border-none bg-transparent"
               placeholder="Type what you want to see..."
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
@@ -125,22 +172,44 @@ export default function Home() {
                   e.preventDefault();
                 }
               }}
+              style={{
+                background: "transparent",
+                padding: "0",
+                border: "none",
+                outline: "none",
+              }}
               autoFocus
             />
-            <button
-              className={`shrink-0 ${
-                prompt ? "cursor-pointer" : "cursor-default"
-              }`}
-              onClick={makeImage}
-            >
-              <Send
-                className={`text-white rotate-45 ml-4 ${
-                  prompt ? "hover:opacity-50" : "opacity-50"
-                } duration-200`}
-                size={20}
-                fill="white"
-              />
-            </button>
+            <div className="shrink-0 flex flex-row gap-2 items-center h-full ml-4">
+              <button
+                className="cursor-pointer"
+                onClick={() => {
+                  setSettingsOpen(!settingsOpen);
+                }}
+              >
+                <Settings2
+                  className={`${
+                    settingsOpen
+                      ? "text-white"
+                      : "hover:text-white text-white/50"
+                  } duration-200`}
+                  size={20}
+                />
+              </button>
+              <div className="h-[1.5rem] w-[1px] bg-white/10 rounded" />
+              <button
+                className={`${prompt ? "cursor-pointer" : "cursor-default"}`}
+                onClick={makeImage}
+              >
+                <Send
+                  className={`text-white rotate-45 ${
+                    prompt ? "hover:opacity-50" : "opacity-25"
+                  } duration-200`}
+                  size={20}
+                  fill="white"
+                />
+              </button>
+            </div>
           </div>
         </div>
       </main>
@@ -149,53 +218,156 @@ export default function Home() {
 }
 
 function Message({ message }: { message: Message }) {
+  const [selectedImage, setSelectedImage] = React.useState(-1);
+
   return (
     <>
-      <div
-        className={`flex flex-col my-2 w-full hover:bg-black/10 ${
-          message.type === "you" ? "items-end" : "items-start"
-        }`}
-      >
-        <div className="flex flex-row gap-2 items-center">
-          {message.timestamp && (
-            <p className="text-white/30 text-sm">
-              {new Date(message.timestamp).toLocaleTimeString()}
-            </p>
+      <div className={`my-2 w-full hover:bg-black/10`}>
+        <div
+          className={`mx-auto max-w-[60rem] px-2 lg:px-0 flex flex-col w-full ${
+            message.type === "you" ? "items-end" : "items-start"
+          }`}
+        >
+          <div className="flex flex-row gap-2 items-center">
+            {message.timestamp && (
+              <p className="text-white/30 text-sm">
+                {new Date(message.timestamp).toLocaleTimeString()}
+              </p>
+            )}
+            <h1 className="font-semibold text-white">
+              {message.type === "you" ? "You" : "Stable Diffusion"}
+            </h1>
+          </div>
+          {message.images && message.settings && message.images.length > 0 && (
+            <div className={`flex flex-row gap-2 overflow-hidden flex-wrap`}>
+              {message.images.map((image, i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={i}
+                  src={image.image}
+                  alt="Generated image"
+                  className={`rounded mt-2 duration-300 hover:opacity-75 cursor-pointer`}
+                  style={{
+                    maxHeight: selectedImage === i ? "25rem" : "10rem",
+                    maxWidth: selectedImage === i ? "25rem" : "10rem",
+                    height:
+                      selectedImage > -1 && selectedImage !== i
+                        ? "0"
+                        : `${message.settings?.height}px`,
+                    width:
+                      selectedImage > -1 && selectedImage !== i
+                        ? "0"
+                        : `${message.settings?.width}px`,
+                  }}
+                  onClick={() => {
+                    if (selectedImage === i) {
+                      setSelectedImage(-1);
+                    } else {
+                      setSelectedImage(i);
+                    }
+                  }}
+                />
+              ))}
+            </div>
           )}
-          <h1 className="font-semibold text-white">
-            {message.type === "you" ? "You" : "Stable Diffusion"}
-          </h1>
+          {message.prompt && message.type === "you" && (
+            <p className="text-white/75">{message.prompt}</p>
+          )}
+          {message.loading && message.images && message.images.length === 0 && (
+            <div className="flex flex-row gap-1 my-3">
+              <div className="animate-pulse bg-white/75 w-3 h-3 rounded-full" />
+              <div className="animate-pulse bg-white/75 w-3 h-3 rounded-full" />
+              <div className="animate-pulse bg-white/75 w-3 h-3 rounded-full" />
+            </div>
+          )}
         </div>
-        {message.images && message.images.length > 0 && (
-          <div className="flex flex-row gap-1 max-h-[10rem] overflow-hidden">
-            {message.images.map((image, i) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={i}
-                src={image}
-                alt="Generated image"
-                className="shrink rounded mt-2"
-                style={{
-                  maxHeight: "10rem",
-                  maxWidth: "10rem",
-                  height: "512px",
-                  width: "512px",
-                }}
-              />
-            ))}
-          </div>
-        )}
-        {message.prompt && message.type === "you" && (
-          <p className="text-white/75">{message.prompt}</p>
-        )}
-        {message.loading && message.images && message.images.length === 0 && (
-          <div className="flex flex-row gap-1 my-3">
-            <div className="animate-pulse bg-white/75 w-3 h-3 rounded-full" />
-            <div className="animate-pulse bg-white/75 w-3 h-3 rounded-full" />
-            <div className="animate-pulse bg-white/75 w-3 h-3 rounded-full" />
-          </div>
-        )}
       </div>
     </>
+  );
+}
+
+function Settings({
+  open,
+  settings,
+  setSettings,
+}: {
+  open: boolean;
+  settings: Settings;
+  setSettings(settings: any): void;
+}) {
+  return (
+    <div
+      className={`absolute bottom-[3.75rem] duration-200 flex flex-col gap-4 p-3 w-80 bg-[#373737] rounded-lg drop-shadow-md ${
+        open ? "block right-[0.5rem]" : "hidden opacity-0 right-[0.75rem]"
+      }`}
+    >
+      <div className="flex flex-col gap-1">
+        <div className="flex flex-row justify-between">
+          <h1 className="text-white text-sm font-semibold">Size</h1>
+          <p className="text-white/50 text-sm">
+            {settings.width}x{settings.height}
+          </p>
+        </div>
+        <input
+          type="range"
+          className="w-full h-2 bg-white/10 rounded-full appearance-none"
+          min={settings.model === "stable-diffusion-768-v2-1" ? 768 : 512}
+          max={1024}
+          step={64}
+          value={settings.width}
+          onChange={(e) => {
+            setSettings({
+              ...settings,
+              width: parseInt(e.target.value),
+              height: parseInt(e.target.value),
+            });
+          }}
+        />
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <div className="flex flex-row justify-between">
+          <h1 className="text-white text-sm font-semibold">Model</h1>
+        </div>
+        <div className="flex flex-row gap-2">
+          {["v1.5", "v2.1", "v2.1 large"].map((model) => (
+            <button
+              key={model}
+              className={`rounded flex justify-center font-semibold px-2 items-center ${
+                settings.model ===
+                (model === "v1.5"
+                  ? "stable-diffusion-v1-5"
+                  : model === "v2.1"
+                  ? "stable-diffusion-512-v2-1"
+                  : "stable-diffusion-768-v2-1")
+                  ? "bg-white/10 text-white"
+                  : "hover:text-white text-white/75"
+              }`}
+              onClick={() => {
+                setSettings({
+                  ...settings,
+                  model:
+                    model === "v1.5"
+                      ? "stable-diffusion-v1-5"
+                      : model === "v2.1"
+                      ? "stable-diffusion-512-v2-1"
+                      : "stable-diffusion-768-v2-1",
+                  width: Math.max(
+                    model === "v2.1 large" ? 768 : 512,
+                    settings.width
+                  ),
+                  height: Math.max(
+                    model === "v2.1 large" ? 768 : 512,
+                    settings.height
+                  ),
+                });
+              }}
+            >
+              {model}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
