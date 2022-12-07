@@ -244,6 +244,11 @@ export default function Home() {
                 if (e.key === "Enter") {
                   makeImage();
                   e.preventDefault();
+                  // check if on mobile
+                  if (window.innerWidth < 768) {
+                    // @ts-ignore
+                    e.target.blur();
+                  }
                 }
               }}
               style={{
