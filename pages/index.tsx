@@ -88,7 +88,7 @@ export default function Home() {
         ...message,
         timestamp: Date.now(),
       });
-      index = newHistory.length - 1;
+      index = newHistory.length;
       return newHistory;
     });
 
