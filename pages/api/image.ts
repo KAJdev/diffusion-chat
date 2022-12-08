@@ -36,8 +36,7 @@ export default async function (req: NextRequest) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        // @ts-ignore
-        Authorization: req.env.API_KEY || "",
+        Authorization: process.env.API_KEY || "",
         Accept: "application/json",
       },
       body: JSON.stringify({
