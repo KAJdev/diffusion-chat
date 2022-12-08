@@ -51,6 +51,7 @@ export default async function (req: NextRequest) {
         clip_guidance_preset: "FAST_BLUE",
         width: json.width || 512,
         height: json.height || 512,
+        steps: json.steps || 30,
       }),
     }
   );

@@ -32,6 +32,7 @@ interface Settings {
   width: number;
   height: number;
   count: number;
+  steps: number;
 }
 
 function sendNotification(options: NotificationOptions) {
@@ -86,6 +87,7 @@ export default function Home() {
     width: 512,
     height: 512,
     count: 4,
+    steps: 30,
   });
 
   function addToHistory(message: Message) {
@@ -149,6 +151,7 @@ export default function Home() {
         width: settings.width,
         height: settings.height,
         count: settings.count,
+        steps: settings.steps,
       }),
     });
 
@@ -568,6 +571,27 @@ function Settings({
             setSettings({
               ...settings,
               count: parseInt(e.target.value),
+            });
+          }}
+        />
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <div className="flex flex-row justify-between">
+          <h1 className="text-white text-sm font-semibold">Steps</h1>
+          <p className="text-white/50 text-sm">{settings.steps}</p>
+        </div>
+        <input
+          type="range"
+          className="w-full h-2 bg-white/10 rounded-full appearance-none"
+          min={10}
+          max={150}
+          step={1}
+          value={settings.steps}
+          onChange={(e) => {
+            setSettings({
+              ...settings,
+              steps: parseInt(e.target.value),
             });
           }}
         />
