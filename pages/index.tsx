@@ -153,7 +153,17 @@ export default function Home() {
     });
 
     if (!res.ok) {
-      newMsg.error = "Something went wrong";
+      switch (res.status) {
+        case 400:
+          newMsg.error = "Bad request";
+          break;
+        case 429:
+          newMsg.error = "You're too fast! Slow down!";
+          break;
+        default:
+          newMsg.error = "Something went wrong";
+          break;
+      }
       newMsg.loading = false;
       newMsg.buttons = [
         {
@@ -419,6 +429,7 @@ function Message({
               {message.prompt}
             </p>
           )}
+          {message.error && <p className="text-red-500">{message.error}</p>}
           {message.loading && message.images && message.images.length === 0 && (
             <div className="flex flex-row gap-1 my-3">
               <div className="animate-pulse bg-white/25 w-3 h-3 rounded-full" />
@@ -450,7 +461,6 @@ function Message({
               ))}
             </div>
           )}
-          {message.error && <p className="text-red-500">{message.error}</p>}
         </div>
       </div>
     </>
