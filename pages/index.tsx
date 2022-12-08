@@ -80,15 +80,19 @@ export default function Home() {
   });
 
   function addToHistory(message: Message): number {
-    setHistory((prev) => [
-      ...prev,
-      {
+    let index = 0;
+
+    setHistory((prev) => {
+      const newHistory = [...prev];
+      newHistory.push({
         ...message,
         timestamp: Date.now(),
-      },
-    ]);
+      });
+      index = newHistory.length - 1;
+      return newHistory;
+    });
 
-    return history.length + 1;
+    return index;
   }
 
   function editMessage(index: number, message: Message) {
