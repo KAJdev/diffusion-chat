@@ -9,6 +9,7 @@ interface Artifact {
 
 interface Message {
   type: "you" | "stable diffusion";
+  uuid: string;
   timestamp?: number;
   images?: Artifact[];
   prompt?: string;
@@ -65,6 +66,14 @@ const b64toBlob = (b64Data: string, contentType = "") => {
   return new Blob([buffer], { type: contentType });
 };
 
+const uuidv4 = () => {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    var r = (Math.random() * 16) | 0,
+      v = c == "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
+
 export default function Home() {
   const [prompt, setPrompt] = React.useState<string>("");
   const [history, setHistory] = React.useState<Message[]>([]);
@@ -79,25 +88,21 @@ export default function Home() {
     count: 4,
   });
 
-  function addToHistory(message: Message): number {
-    let index = 0;
-
+  function addToHistory(message: Message) {
     setHistory((prev) => {
       const newHistory = [...prev];
       newHistory.push({
         ...message,
         timestamp: Date.now(),
       });
-      index = newHistory.length;
       return newHistory;
     });
-
-    return index;
   }
 
-  function editMessage(index: number, message: Message) {
+  function editMessage(id: string, message: Message) {
     setHistory((prev) => {
       const newHistory = [...prev];
+      const index = newHistory.findIndex((m) => m.uuid === id);
       newHistory[index] = {
         ...message,
         timestamp: Date.now(),
@@ -115,9 +120,13 @@ export default function Home() {
     addToHistory({
       type: "you",
       prompt: prompt || overridePrompt,
+      uuid: uuidv4(),
     });
 
+    const newMsgIndex = history.length + 1;
+
     await new Promise((r) => setTimeout(r, 400));
+    const uid = uuidv4();
     const newMsg: Message = {
       type: "stable diffusion",
       prompt: prompt || overridePrompt,
@@ -125,8 +134,9 @@ export default function Home() {
       loading: true,
       settings,
       buttons: [],
+      uuid: uid,
     };
-    const newMsgIndex = addToHistory(newMsg);
+    addToHistory(newMsg);
 
     requestNotificationPermission();
 
@@ -151,7 +161,7 @@ export default function Home() {
           id: "regenerate",
         },
       ];
-      editMessage(newMsgIndex, newMsg);
+      editMessage(uid, newMsg);
       return;
     }
 
@@ -182,7 +192,7 @@ export default function Home() {
       },
     ];
     console.log("new msg", newMsg);
-    editMessage(newMsgIndex, newMsg);
+    editMessage(uid, newMsg);
     sendNotification({
       icon: newMsg.images![0].image,
       body: prompt || overridePrompt,
