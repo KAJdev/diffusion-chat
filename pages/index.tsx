@@ -274,7 +274,7 @@ export default function Home() {
                 className="text-blue-400 hover:underline cursor-pointer"
                 onClick={() => setPrompt(suprisePrompt())}
               >
-                Suprise Me!
+                Surprise Me!
               </span>
             </div>
           </div>
