@@ -30,14 +30,14 @@ export default async function (req: NextRequest) {
   const prompts = [
     {
       text: json.prompt,
-      weight: 1.5,
+      weight: 0.75,
     },
   ];
 
   if (json.modifiers) {
     prompts.push({
       text: json.modifiers,
-      weight: 0.25,
+      weight: 0.75,
     });
   }
 

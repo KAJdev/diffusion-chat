@@ -124,7 +124,7 @@ export default function Home() {
     const originalPrompt = prompt || overridePrompt || "";
     let modifiers = overrideModifiers || null;
 
-    if (originalPrompt.length < 75 && !modifiers) {
+    if (originalPrompt.length < 150 && !modifiers) {
       modifiers = spicePrompt();
     }
 
@@ -788,40 +788,14 @@ const artists = [
 ];
 
 const modifiers = [
-  "oil painting",
-  "watercolor painting",
   "acrylic painting",
-  "Professional",
   "trending on CGSociety",
   "trending on DeviantArt",
   "trending on ArtStation",
   "majestic",
   "epic",
   "legendary",
-  "magnificent",
-  "rustic",
-  "vintage",
-  "modern",
-  "Unreal Engine 4",
-  "Unity",
-  "Blender",
   "Maya",
-  "ZBrush",
-  "Substance Painter",
-  "Substance Designer",
-  "Photoshop",
-  "Illustrator",
-  "Octane Render",
-  "Redshift Render",
-  "dramatic lighting",
-  "realistic lighting",
-  "realistic",
-  "photorealistic",
-  "refractive",
-  "rule of thirds",
-  "golden ratio",
-  "golden spiral",
-  "volumentric lighting",
   "8K",
   "4K",
   "wallpaper",
@@ -830,9 +804,41 @@ const modifiers = [
   "WLOP",
   "artgerm",
   "highly detailed",
+  "by Greg Manchess",
+  "by Antonio Moro",
+  "Studio Ghibli",
+  "Makoto Shinkai",
+  "illustration",
+  "digital painting",
+  "concept art",
+  "abstract art",
+  "bloomcore",
+  "rosepunk",
+  "rosecore",
+  "digital art",
+  "digital painting",
+  "digital illustration",
+  "digital drawing",
+  "digital sketch",
+  "greg rutkowski",
+  "masterpiece",
+  "masterpiece by Greg Rutkowski",
+  "fantasy",
+  "fantasy art",
+  "fantasy illustration",
+  "fantasy painting",
+  "fantasy drawing",
   "sharp focus",
-  "smooth",
-  "mucha",
+  "Alphonse Mucha",
+  "sharp",
+  "Moebius",
+  "Cyril Rolando",
+  "Judy Chicago",
+  "Blizzard",
+  "elegant",
+  "steampunk",
+  "steampunk art",
+  "steampunk illustration",
 ];
 
 function suprisePrompt(): string {
@@ -856,7 +862,7 @@ function suprisePrompt(): string {
 
 function spicePrompt(): string {
   const modifierArray = [];
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 10; i++) {
     modifierArray.push(modifiers[Math.floor(Math.random() * modifiers.length)]);
   }
   return modifierArray.join(", ");
