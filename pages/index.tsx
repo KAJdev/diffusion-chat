@@ -696,7 +696,7 @@ function PromptBook({
   function addPrompt(p: string) {
     if (p.length > 0) {
       setPrompts((prompts) => {
-        const newPrompts = [...prompts, p];
+        const newPrompts = [p, ...prompts];
         localStorage.setItem("prompts", JSON.stringify(newPrompts));
         return newPrompts;
       });
@@ -713,7 +713,7 @@ function PromptBook({
     >
       {prompts.length > 0 ? (
         <>
-          {prompt && (
+          {prompt && !prompts.includes(prompt) && (
             <button
               className="flex flex-row justify-between items-center w-full border border-white/10 hover:border-white/20 border-dashed hover:text-white duration-150 rounded"
               onClick={() => {
@@ -734,7 +734,7 @@ function PromptBook({
                 setOpen(false);
               }}
             >
-              <p className="text-white/75 text-sm break-all max-h-[5rem] overflow-hidden text-ellipsis">
+              <p className="text-white/75 text-sm text-left break-word max-h-[5rem] overflow-hidden text-ellipsis">
                 {prompt}
               </p>
               <button
@@ -757,7 +757,7 @@ function PromptBook({
         <div className="w-full h-full flex justify-center grow items-center">
           {prompt ? (
             <button
-              className="text-white text-sm font-semibold"
+              className="text-white text-sm font-semibold border border-white/10 hover:border-white/25 duration-200 p-2 px-3 rounded-lg"
               onClick={() => addPrompt(prompt)}
             >
               Save current prompt
