@@ -834,13 +834,9 @@ function suprisePrompt(): string {
 }
 
 function spicePrompt(): string {
-  let s = "";
-
   const modifierArray = [];
   for (let i = 0; i < 5; i++) {
     modifierArray.push(modifiers[Math.floor(Math.random() * modifiers.length)]);
   }
-  s += modifierArray.join(", ");
-
-  return s;
+  return modifierArray.join(", ");
 }
