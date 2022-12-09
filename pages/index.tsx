@@ -499,7 +499,7 @@ function Message({
             </div>
           )}
           {message.prompt && message.type === "you" && (
-            <p className="text-white/75 text-right break-all whitespace-pre-wrap">
+            <p className="text-white/75 text-right break-word">
               {message.prompt}
             </p>
           )}
