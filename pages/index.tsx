@@ -827,7 +827,7 @@ function suprisePrompt(): string {
     .replace(/{artist}/g, artists[Math.floor(Math.random() * artists.length)]);
 
   for (let i = 0; i < Math.random() * 10; i++) {
-    s += modifiers[Math.floor(Math.random() * modifiers.length)];
+    s += ", " + modifiers[Math.floor(Math.random() * modifiers.length)];
   }
 
   return s;
