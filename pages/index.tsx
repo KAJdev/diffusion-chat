@@ -402,7 +402,7 @@ function Message({
         >
           <div className="flex flex-row gap-2 items-center">
             {message.timestamp && (
-              <p className="text-white/30 text-sm">
+              <p className="text-white/30 self-end">
                 {new Date(message.timestamp).toLocaleTimeString()}
               </p>
             )}
