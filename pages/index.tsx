@@ -1,5 +1,14 @@
 import Head from "next/head";
-import { MessageCircle, Send, Settings2, Wand2 } from "lucide-react";
+import {
+  Album,
+  Delete,
+  MessageCircle,
+  Plus,
+  Send,
+  Settings2,
+  Trash2,
+  Wand2,
+} from "lucide-react";
 import React from "react";
 import { motion } from "framer-motion";
 
@@ -84,6 +93,7 @@ export default function Home() {
   const mainConatiner = React.useRef<HTMLDivElement>(null);
 
   const [settingsOpen, setSettingsOpen] = React.useState(false);
+  const [promptBookOpen, setPromptBookOpen] = React.useState(false);
   const [settings, setSettings] = React.useState<Settings>({
     model: "stable-diffusion-v1-5",
     width: 512,
@@ -314,6 +324,12 @@ export default function Home() {
             settings={settings}
             setSettings={setSettings}
           />
+          <PromptBook
+            open={promptBookOpen}
+            setPrompt={setPrompt}
+            setOpen={setPromptBookOpen}
+            prompt={prompt}
+          />
           <div
             className={`px-4 py-3 mt-2 z-10 bg-chatbox flex flex-row items-center w-full mb-6 ${
               !prompt && history.length < 10
@@ -350,7 +366,24 @@ export default function Home() {
               <button
                 className="cursor-pointer"
                 onClick={() => {
+                  setPromptBookOpen(!promptBookOpen);
+                  setSettingsOpen(false);
+                }}
+              >
+                <Album
+                  className={`${
+                    promptBookOpen
+                      ? "text-white"
+                      : "hover:text-white text-white/50"
+                  } duration-200`}
+                  size={20}
+                />
+              </button>
+              <button
+                className="cursor-pointer"
+                onClick={() => {
                   setSettingsOpen(!settingsOpen);
+                  setPromptBookOpen(false);
                 }}
               >
                 <Settings2
@@ -636,6 +669,104 @@ function Settings({
           }}
         />
       </div>
+    </div>
+  );
+}
+
+function PromptBook({
+  setPrompt,
+  prompt,
+  open,
+  setOpen,
+}: {
+  setPrompt(prompt: string): void;
+  prompt: string;
+  open: boolean;
+  setOpen(open: boolean): void;
+}) {
+  const [prompts, setPrompts] = React.useState<string[]>([]);
+
+  React.useEffect(() => {
+    const prompts = localStorage.getItem("prompts");
+    if (prompts) {
+      setPrompts(JSON.parse(prompts));
+    }
+  }, []);
+
+  function addPrompt(p: string) {
+    if (p.length > 0) {
+      setPrompts((prompts) => {
+        const newPrompts = [...prompts, p];
+        localStorage.setItem("prompts", JSON.stringify(newPrompts));
+        return newPrompts;
+      });
+    }
+  }
+
+  return (
+    <div
+      className={`absolute bottom-[3.75rem] min-h-[13rem] max-h-[30rem] overflow-y-auto duration-200 flex flex-col gap-1 p-2 w-80 bg-settingsPanel border border-chatbox rounded-lg drop-shadow-md ${
+        open
+          ? "block right-[0.75rem] lg:right-[0.5rem]"
+          : "hidden opacity-0 right-[0.75rem]"
+      }`}
+    >
+      {prompts.length > 0 ? (
+        <>
+          {prompt && (
+            <button
+              className="flex flex-row justify-between items-center w-full border border-white/10 hover:border-white/20 border-dashed hover:text-white duration-150 rounded"
+              onClick={() => {
+                addPrompt(prompt);
+              }}
+            >
+              <p className="text-white/75 text-center p-2 w-full text-sm font-semibold flex flex-row items-center justify-center gap-2">
+                Save Current prompt <Plus className="w-4 h-4" />
+              </p>
+            </button>
+          )}
+          {prompts.map((prompt, i) => (
+            <button
+              key={prompt}
+              className="flex flex-row justify-between items-center pl-3 pr-2 py-2 border border-white/10 rounded w-full gap-2"
+              onClick={() => {
+                setPrompt(prompt);
+                setOpen(false);
+              }}
+            >
+              <p className="text-white/75 text-sm break-all max-h-[5rem] overflow-hidden text-ellipsis">
+                {prompt}
+              </p>
+              <button
+                className="flex justify-center shrink-0 items-center w-6 h-6 hover:bg-white/10 hover:text-white text-white/50 rounded duration-100"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setPrompts(prompts.filter((_, j) => j !== i));
+                  localStorage.setItem(
+                    "prompts",
+                    JSON.stringify(prompts.filter((_, j) => j !== i))
+                  );
+                }}
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </button>
+          ))}
+        </>
+      ) : (
+        <div className="w-full h-full flex justify-center grow items-center">
+          {prompt ? (
+            <button
+              className="text-white text-sm font-semibold"
+              onClick={() => addPrompt(prompt)}
+            >
+              Save current prompt
+            </button>
+          ) : (
+            <p className="text-white text-sm font-semibold">No prompts saved</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
