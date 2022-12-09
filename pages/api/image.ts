@@ -30,18 +30,21 @@ export default async function (req: NextRequest) {
   const prompts = [
     {
       text: json.prompt,
-      weight: 1,
-    },
-    {
-      text: "amateur, poorly drawn, ugly, flat, tiling, poorly drawn hands, poorly drawn feet, poorly drawn face, out of frame, extra limbs, disfigured, deformed, body out of frame, blurry, bad anatomy, blurred, watermark, grainy, signature, cut off, draft",
-      weight: -0.75,
+      weight: 1.5,
     },
   ];
 
   if (json.modifiers) {
     prompts.push({
       text: json.modifiers,
-      weight: 0.2,
+      weight: 0.25,
+    });
+  }
+
+  if (json.prompt.length > 15) {
+    prompts.push({
+      text: "amateur, poorly drawn, ugly, flat, tiling, poorly drawn hands, poorly drawn feet, poorly drawn face, out of frame, extra limbs, disfigured, deformed, body out of frame, blurry, bad anatomy, blurred, watermark, grainy, signature, cut off, draft",
+      weight: -0.5,
     });
   }
 
