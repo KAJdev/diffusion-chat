@@ -1,6 +1,7 @@
 import Head from "next/head";
 import { MessageCircle, Send, Settings2 } from "lucide-react";
 import React from "react";
+import { motion } from "framer-motion";
 
 interface Artifact {
   image: string;
@@ -13,6 +14,7 @@ interface Message {
   timestamp?: number;
   images?: Artifact[];
   prompt?: string;
+  modifiers?: string;
   loading?: boolean;
   settings?: Settings;
   buttons?: Button[];
@@ -113,25 +115,35 @@ export default function Home() {
     });
   }
 
-  async function makeImage(overridePrompt?: string) {
+  async function makeImage(
+    overridePrompt?: string,
+    overrideModifiers?: string
+  ) {
     if (!prompt && !overridePrompt) return;
+
+    const originalPrompt = prompt || overridePrompt || "";
+    let modifiers = overrideModifiers || null;
+
+    if (originalPrompt.length < 75 && !modifiers) {
+      modifiers = spicePrompt();
+    }
 
     setPrompt("");
     setSettingsOpen(false);
 
     addToHistory({
       type: "you",
-      prompt: prompt || overridePrompt,
+      prompt: originalPrompt,
+      modifiers: modifiers || undefined,
       uuid: uuidv4(),
     });
-
-    const newMsgIndex = history.length + 1;
 
     await new Promise((r) => setTimeout(r, 400));
     const uid = uuidv4();
     const newMsg: Message = {
       type: "stable diffusion",
-      prompt: prompt || overridePrompt,
+      prompt: originalPrompt,
+      modifiers: modifiers || undefined,
       images: [],
       loading: true,
       settings,
@@ -146,7 +158,8 @@ export default function Home() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        prompt: prompt || overridePrompt,
+        prompt: originalPrompt,
+        modifiers,
         model: settings.model,
         width: settings.width,
         height: settings.height,
@@ -208,7 +221,7 @@ export default function Home() {
     editMessage(uid, newMsg);
     sendNotification({
       icon: newMsg.images![0].image,
-      body: prompt || overridePrompt,
+      body: newMsg.prompt,
       tag: "chat-diffusion",
       requireInteraction: false,
     });
@@ -253,7 +266,7 @@ export default function Home() {
         ))}
       </main>
       <div
-        className="fixed bottom-0 w-screen bg-[#2c2c2c]"
+        className="fixed bottom-0 w-screen bg-background"
         ref={inputContainer}
       >
         <div
@@ -263,12 +276,12 @@ export default function Home() {
         >
           <div
             className={`absolute duration-200 ${
-              !prompt && history.length % 2 < 1 && history.length < 10
+              !prompt && history.length < 10
                 ? "-bottom-[1.5rem]"
                 : "-bottom-[3.75rem]"
             } pr-[0.5rem] w-full lg:pl-0 pl-[0.5rem]`}
           >
-            <div className="bg-[#272727] rounded-lg w-full pb-5 px-4 pt-1.5 text-white/75 text-sm">
+            <div className="bg-popupBar rounded-lg w-full pb-5 px-4 pt-1.5 text-white/75 text-sm">
               {"Don't know what to say? "}{" "}
               <span
                 className="text-blue-400 hover:underline cursor-pointer"
@@ -285,7 +298,13 @@ export default function Home() {
             settings={settings}
             setSettings={setSettings}
           />
-          <div className="px-4 py-3 mt-2 z-10 rounded-lg bg-[#424242] flex flex-row items-center w-full mb-6">
+          <div
+            className={`px-4 py-3 mt-2 z-10 bg-chatbox flex flex-row items-center w-full mb-6 ${
+              !prompt && history.length < 10
+                ? "border-t border-background rounded-b-lg"
+                : "rounded-lg"
+            }`}
+          >
             <input
               type="text"
               className="w-full text-lg text-white/75 placeholder:text-white/30 outline-none focus:border-none bg-transparent"
@@ -333,11 +352,11 @@ export default function Home() {
                 onClick={() => makeImage()}
               >
                 <Send
-                  className={`text-white rotate-45 ${
+                  className={`text-accent rotate-45 ${
                     prompt ? "hover:opacity-50" : "opacity-25"
                   } duration-200`}
                   size={20}
-                  fill="white"
+                  fill="currentColor"
                 />
               </button>
             </div>
@@ -353,7 +372,7 @@ function Message({
   makeImage,
 }: {
   message: Message;
-  makeImage: (overridePrompt?: string) => void;
+  makeImage: (overridePrompt?: string, overrideModifiers?: string) => void;
 }) {
   const [selectedImage, setSelectedImage] = React.useState(-1);
 
@@ -445,10 +464,10 @@ function Message({
               {message.buttons.map((btn, i) => (
                 <button
                   key={i}
-                  className="border-white/10 border rounded px-3 py-1 text-white/75 font-semibold hover:bg-white/20 hover:text-white/100 duration-200"
+                  className="border-white/10 border rounded px-3 py-1 text-white/75 font-semibold hover:bg-backgroundSecondary hover:text-white/100 duration-200"
                   onClick={() => {
                     if (btn.id == "regenerate") {
-                      makeImage(message.prompt);
+                      makeImage(message.prompt, message.modifiers);
                     } else if (btn.id == "save") {
                       message.images?.forEach((image) => {
                         const link = document.createElement("a");
@@ -481,7 +500,7 @@ function Settings({
 }) {
   return (
     <div
-      className={`absolute bottom-[3.75rem] duration-200 flex flex-col gap-4 p-3 w-80 bg-[#373737] rounded-lg drop-shadow-md ${
+      className={`absolute bottom-[3.75rem] duration-200 flex flex-col gap-4 p-3 w-80 bg-settingsPanel border border-chatbox rounded-lg drop-shadow-md ${
         open
           ? "block right-[0.75rem] lg:right-[0.5rem]"
           : "hidden opacity-0 right-[0.75rem]"
@@ -747,9 +766,57 @@ const artists = [
   "Ian Mcewan",
 ];
 
+const modifiers = [
+  "oil painting",
+  "watercolor painting",
+  "acrylic painting",
+  "Professional",
+  "trending on CGSociety",
+  "trending on DeviantArt",
+  "trending on ArtStation",
+  "majestic",
+  "epic",
+  "legendary",
+  "magnificent",
+  "rustic",
+  "vintage",
+  "modern",
+  "Unreal Engine 4",
+  "Unity",
+  "Blender",
+  "Maya",
+  "ZBrush",
+  "Substance Painter",
+  "Substance Designer",
+  "Photoshop",
+  "Illustrator",
+  "Octane Render",
+  "Redshift Render",
+  "dramatic lighting",
+  "realistic lighting",
+  "realistic",
+  "photorealistic",
+  "refractive",
+  "rule of thirds",
+  "golden ratio",
+  "golden spiral",
+  "volumentric lighting",
+  "8K",
+  "4K",
+  "wallpaper",
+  "intricately detailed",
+  "dramatic",
+  "WLOP",
+  "artgerm",
+  "highly detailed",
+  "sharp focus",
+  "smooth",
+  "mucha",
+];
+
 function suprisePrompt(): string {
   const template = templates[Math.floor(Math.random() * templates.length)];
-  return template
+  let s = template
     .replace(/{noun}/g, nouns[Math.floor(Math.random() * nouns.length)])
     .replace(/{gerund}/g, gerunds[Math.floor(Math.random() * gerunds.length)])
     .replace(
@@ -758,4 +825,22 @@ function suprisePrompt(): string {
     )
     .replace(/{adverb}/g, adverbs[Math.floor(Math.random() * adverbs.length)])
     .replace(/{artist}/g, artists[Math.floor(Math.random() * artists.length)]);
+
+  for (let i = 0; i < Math.random() * 10; i++) {
+    s += modifiers[Math.floor(Math.random() * modifiers.length)];
+  }
+
+  return s;
+}
+
+function spicePrompt(): string {
+  let s = "";
+
+  const modifierArray = [];
+  for (let i = 0; i < 5; i++) {
+    modifierArray.push(modifiers[Math.floor(Math.random() * modifiers.length)]);
+  }
+  s += modifierArray.join(", ");
+
+  return s;
 }

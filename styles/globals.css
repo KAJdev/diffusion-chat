@@ -11,7 +11,7 @@ body {
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
   color-scheme: dark;
   color: white;
-  background: rgb(44, 44, 44);
+  background: #0d1017;
   padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -30,12 +30,12 @@ a {
 }
 
 ::-webkit-scrollbar-track {
-  background: #242424;
+  background: rgba(0,0,0,0.2);
   border-radius: 0.5rem;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgb(59, 59, 59);
+  @apply bg-chatbox;
   border-radius: 0.5rem;
 }
 
