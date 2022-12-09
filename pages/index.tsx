@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { MessageCircle, Send, Settings2 } from "lucide-react";
+import { MessageCircle, Send, Settings2, Wand2 } from "lucide-react";
 import React from "react";
 import { motion } from "framer-motion";
 
@@ -409,6 +409,9 @@ function Message({
             <h1 className="font-semibold text-white">
               {message.type === "you" ? "You" : "Stable Diffusion"}
             </h1>
+            {message.modifiers && message.type !== "you" && (
+              <Wand2 className="text-white/30" size={16} />
+            )}
           </div>
           {message.images && message.settings && message.images.length > 0 && (
             <div
