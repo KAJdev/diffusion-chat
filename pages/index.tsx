@@ -309,6 +309,7 @@ export default function Home() {
             message={message}
             makeImage={makeImage}
             savePrompt={savePrompt}
+            savedPrompts={savedPrompts}
           />
         ))}
       </main>
@@ -444,10 +445,12 @@ function Message({
   message,
   makeImage,
   savePrompt,
+  savedPrompts,
 }: {
   message: Message;
   makeImage: (overridePrompt?: string, overrideModifiers?: string) => void;
   savePrompt: (prompt: string) => void;
+  savedPrompts: string[];
 }) {
   const [selectedImage, setSelectedImage] = React.useState(-1);
 
@@ -539,30 +542,38 @@ function Message({
           )}
           {message.buttons && message.buttons.length > 0 && (
             <div className="flex flex-row gap-2 my-2">
-              {message.buttons.map((btn, i) => (
-                <button
-                  key={i}
-                  className="border-white/10 border rounded px-3 py-1 text-white/75 font-semibold hover:bg-backgroundSecondary hover:text-white/100 duration-200"
-                  onClick={() => {
-                    if (btn.id == "regenerate") {
-                      makeImage(message.prompt, message.modifiers);
-                    } else if (btn.id == "save") {
-                      message.images?.forEach((image) => {
-                        const link = document.createElement("a");
-                        link.href = image.image;
-                        link.download = `image-${new Date().getTime()}.png`;
-                        link.click();
-                      });
-                    } else if (btn.id == "remix") {
-                      makeImage(message.prompt);
-                    } else if (btn.id == "save_prompt" && message.prompt) {
-                      savePrompt(message.prompt);
-                    }
-                  }}
-                >
-                  {btn.text}
-                </button>
-              ))}
+              {message.buttons.map((btn, i) => {
+                if (
+                  btn.id === "save_prompt" &&
+                  (!message.prompt || savedPrompts.includes(message.prompt))
+                )
+                  return null;
+
+                return (
+                  <button
+                    key={i}
+                    className="border-white/10 border rounded px-3 py-1 text-white/75 font-semibold hover:bg-backgroundSecondary hover:text-white/100 duration-200"
+                    onClick={() => {
+                      if (btn.id == "regenerate") {
+                        makeImage(message.prompt, message.modifiers);
+                      } else if (btn.id == "save") {
+                        message.images?.forEach((image) => {
+                          const link = document.createElement("a");
+                          link.href = image.image;
+                          link.download = `image-${new Date().getTime()}.png`;
+                          link.click();
+                        });
+                      } else if (btn.id == "remix") {
+                        makeImage(message.prompt);
+                      } else if (btn.id == "save_prompt" && message.prompt) {
+                        savePrompt(message.prompt);
+                      }
+                    }}
+                  >
+                    {btn.text}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
