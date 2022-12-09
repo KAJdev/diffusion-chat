@@ -128,6 +128,14 @@ export default function Home() {
       modifiers = spicePrompt();
     }
 
+    if (originalPrompt.length < 35) {
+      if (modifiers) {
+        modifiers = originalPrompt + " " + modifiers;
+      } else {
+        modifiers = originalPrompt;
+      }
+    }
+
     setPrompt("");
     setSettingsOpen(false);
 
@@ -213,14 +221,18 @@ export default function Home() {
         id: "regenerate",
       },
       {
-        text: "Remix",
-        id: "remix",
-      },
-      {
         text: "Save",
         id: "save",
       },
     ];
+
+    if (newMsg.modifiers) {
+      newMsg.buttons.push({
+        text: "Remix",
+        id: "remix",
+      });
+    }
+
     console.log("new msg", newMsg);
     editMessage(uid, newMsg);
     sendNotification({
