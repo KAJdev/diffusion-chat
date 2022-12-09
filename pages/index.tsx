@@ -728,13 +728,13 @@ function PromptBook({
           {prompts.map((prompt, i) => (
             <button
               key={prompt}
-              className="flex flex-row justify-between items-center pl-3 pr-2 py-2 border border-white/10 rounded w-full gap-2"
+              className="flex flex-row justify-between text-white/75 hover:text-white items-center p-2 border-b last-of-type:border-none border-white/10 w-full gap-2"
               onClick={() => {
                 setPrompt(prompt);
                 setOpen(false);
               }}
             >
-              <p className="text-white/75 text-sm text-left break-word max-h-[5rem] overflow-hidden text-ellipsis">
+              <p className="text-sm text-left break-word max-h-[5rem] overflow-hidden text-ellipsis">
                 {prompt}
               </p>
               <button
