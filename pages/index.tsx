@@ -213,6 +213,10 @@ export default function Home() {
         id: "regenerate",
       },
       {
+        text: "Remix",
+        id: "remix",
+      },
+      {
         text: "Save",
         id: "save",
       },
@@ -475,6 +479,8 @@ function Message({
                         link.download = `image-${new Date().getTime()}.png`;
                         link.click();
                       });
+                    } else if (btn.id == "remix") {
+                      makeImage(message.prompt);
                     }
                   }}
                 >

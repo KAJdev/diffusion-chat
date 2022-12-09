@@ -41,7 +41,7 @@ export default async function (req: NextRequest) {
   if (json.modifiers) {
     prompts.push({
       text: json.modifiers,
-      weight: 0.25,
+      weight: 0.3,
     });
   }
 
