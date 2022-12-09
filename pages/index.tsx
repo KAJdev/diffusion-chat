@@ -102,6 +102,18 @@ export default function Home() {
     steps: 30,
   });
 
+  const [savedPrompts, setSavedPrompts] = React.useState<string[]>([]);
+
+  function savePrompt(p: string) {
+    if (p.length > 0) {
+      setSavedPrompts((prompts: string[]) => {
+        const newPrompts = [p, ...prompts];
+        localStorage.setItem("prompts", JSON.stringify(newPrompts));
+        return newPrompts;
+      });
+    }
+  }
+
   function addToHistory(message: Message) {
     setHistory((prev) => {
       const newHistory = [...prev];
@@ -231,8 +243,12 @@ export default function Home() {
         id: "regenerate",
       },
       {
-        text: "Save",
+        text: "Download",
         id: "save",
+      },
+      {
+        text: "Save Prompt",
+        id: "save_prompt",
       },
     ];
 
@@ -288,7 +304,12 @@ export default function Home() {
           <div className="border-b border-white/10" />
         </div>
         {history.map((message, i) => (
-          <Message key={i} message={message} makeImage={makeImage} />
+          <Message
+            key={i}
+            message={message}
+            makeImage={makeImage}
+            savePrompt={savePrompt}
+          />
         ))}
       </main>
       <div
@@ -329,6 +350,9 @@ export default function Home() {
             setPrompt={setPrompt}
             setOpen={setPromptBookOpen}
             prompt={prompt}
+            prompts={savedPrompts}
+            setPrompts={setSavedPrompts}
+            savePrompt={savePrompt}
           />
           <div
             className={`px-4 py-3 mt-2 z-10 bg-chatbox flex flex-row items-center w-full mb-6 ${
@@ -419,9 +443,11 @@ export default function Home() {
 function Message({
   message,
   makeImage,
+  savePrompt,
 }: {
   message: Message;
   makeImage: (overridePrompt?: string, overrideModifiers?: string) => void;
+  savePrompt: (prompt: string) => void;
 }) {
   const [selectedImage, setSelectedImage] = React.useState(-1);
 
@@ -529,6 +555,8 @@ function Message({
                       });
                     } else if (btn.id == "remix") {
                       makeImage(message.prompt);
+                    } else if (btn.id == "save_prompt" && message.prompt) {
+                      savePrompt(message.prompt);
                     }
                   }}
                 >
@@ -678,30 +706,24 @@ function PromptBook({
   prompt,
   open,
   setOpen,
+  prompts,
+  setPrompts,
+  savePrompt,
 }: {
   setPrompt(prompt: string): void;
   prompt: string;
   open: boolean;
   setOpen(open: boolean): void;
+  prompts: string[];
+  setPrompts(prompts: any): void;
+  savePrompt(prompt: string): void;
 }) {
-  const [prompts, setPrompts] = React.useState<string[]>([]);
-
   React.useEffect(() => {
     const prompts = localStorage.getItem("prompts");
     if (prompts) {
       setPrompts(JSON.parse(prompts));
     }
-  }, []);
-
-  function addPrompt(p: string) {
-    if (p.length > 0) {
-      setPrompts((prompts) => {
-        const newPrompts = [p, ...prompts];
-        localStorage.setItem("prompts", JSON.stringify(newPrompts));
-        return newPrompts;
-      });
-    }
-  }
+  }, [setPrompts]);
 
   return (
     <div
@@ -717,7 +739,7 @@ function PromptBook({
             <button
               className="flex flex-row justify-between items-center w-full border border-white/10 hover:border-white/20 border-dashed hover:text-white duration-150 rounded"
               onClick={() => {
-                addPrompt(prompt);
+                savePrompt(prompt);
               }}
             >
               <p className="text-white/75 text-center p-2 w-full text-sm font-semibold flex flex-row items-center justify-center gap-2">
@@ -758,7 +780,7 @@ function PromptBook({
           {prompt ? (
             <button
               className="text-white text-sm font-semibold border border-white/10 hover:border-white/25 duration-200 p-2 px-3 rounded-lg"
-              onClick={() => addPrompt(prompt)}
+              onClick={() => savePrompt(prompt)}
             >
               Save current prompt
             </button>
