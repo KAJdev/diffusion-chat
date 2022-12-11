@@ -181,6 +181,7 @@ export namespace Message {
         height: settings.height,
         count: settings.count,
         steps: settings.steps,
+        scale: settings.scale,
       }),
     });
 

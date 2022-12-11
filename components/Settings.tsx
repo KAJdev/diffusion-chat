@@ -139,6 +139,27 @@ export function Settings() {
           }}
         />
       </div>
+
+      <div className="flex flex-col gap-1">
+        <div className="flex flex-row justify-between">
+          <h1 className="text-white text-sm font-semibold">CFG Scale</h1>
+          <p className="text-white/50 text-sm">{settings.scale}</p>
+        </div>
+        <input
+          type="range"
+          className="w-full h-2 bg-white/10 rounded-full appearance-none"
+          min={0}
+          max={35}
+          step={0.1}
+          value={settings.scale}
+          onChange={(e) => {
+            setSettings({
+              ...settings,
+              scale: parseInt(e.target.value),
+            });
+          }}
+        />
+      </div>
     </div>
   );
 }
@@ -152,6 +173,7 @@ export type Settings = {
   height: number;
   count: number;
   steps: number;
+  scale: number;
 };
 
 export type SettingsState = {
@@ -170,6 +192,7 @@ export namespace Settings {
       height: 512,
       count: 4,
       steps: 30,
+      scale: 7,
     } as Settings,
     setSettings: (settings: Settings) =>
       set((state: SettingsState) => ({
