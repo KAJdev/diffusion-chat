@@ -2,6 +2,7 @@ import { Wand2 } from "lucide-react";
 import React from "react";
 import { Button } from "./Button";
 import { ChatBar } from "./ChatBar";
+import { Image } from "./Image";
 import { MessageList } from "./MessageList";
 import { PromptBook } from "./PromptBook";
 import { PromptEngine } from "./PromptEngine";
@@ -38,49 +39,14 @@ export function Message({ id }: { id: string }) {
             className={`flex flex-row gap-2 overflow-hidden flex-wrap max-w-full`}
           >
             {message.images.map((image, i) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
+              <Image
                 key={i}
-                src={image.image}
-                alt="Generated image"
-                className={`rounded mt-2 duration-300 hover:opacity-75 cursor-pointer`}
-                style={{
-                  maxHeight:
-                    selectedImage === i || message.images?.length === 1
-                      ? "25rem"
-                      : "10rem",
-                  maxWidth:
-                    selectedImage === i || message.images?.length === 1
-                      ? "25rem"
-                      : "10rem",
-                  height:
-                    selectedImage > -1 &&
-                    selectedImage !== i &&
-                    message.images?.length !== 1
-                      ? "0"
-                      : `${message.settings?.height}px`,
-                  width:
-                    selectedImage > -1 &&
-                    selectedImage !== i &&
-                    message.images?.length !== 1
-                      ? "0"
-                      : `${message.settings?.width}px`,
-                }}
-                onClick={() => {
-                  if (message.images?.length === 1) return;
-
-                  if (selectedImage === i) {
-                    setSelectedImage(-1);
-                  } else {
-                    setSelectedImage(i);
-                  }
-                }}
-                onLoad={() => {
-                  window.scrollTo({
-                    behavior: "smooth",
-                    top: document.body.scrollHeight,
-                  });
-                }}
+                i={i}
+                image={image}
+                selectedImage={selectedImage}
+                setSelectedImage={setSelectedImage}
+                message={message}
               />
             ))}
           </div>
@@ -99,7 +65,7 @@ export function Message({ id }: { id: string }) {
           </div>
         )}
         {message.buttons && message.buttons.length > 0 && (
-          <div className="flex flex-row gap-2 my-2">
+          <div className="flex flex-row flex-wrap gap-2 my-2">
             {message.buttons.map((btn, i) => {
               if (
                 btn.id === "save_prompt" &&
@@ -107,7 +73,14 @@ export function Message({ id }: { id: string }) {
               )
                 return null;
 
-              return <Button key={i} btn={btn} message={message} />;
+              return (
+                <Button
+                  key={i}
+                  btn={btn}
+                  message={message}
+                  selectedImage={selectedImage}
+                />
+              );
             })}
           </div>
         )}
@@ -168,6 +141,7 @@ export namespace Message {
     if (!prompt && !modifiers) return;
 
     const settings = Settings.use.getState().settings;
+    Settings.use.getState().setOpen(false);
 
     if (prompt.length < 150 && !modifiers) {
       modifiers = PromptEngine.getModifers();
@@ -212,7 +186,7 @@ export namespace Message {
     };
     MessageList.use.getState().addMessage(newMsg);
 
-    const res = await fetch("/api/image", {
+    const res = await fetch("https://api.diffusion.chat/image", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -250,19 +224,7 @@ export namespace Message {
     }
 
     const data = await res.json();
-
-    for (const artifact of data.artifacts) {
-      // turn the base64 url into a blob
-      const blob = b64toBlob(artifact.base64, "image/png");
-
-      // turn the blob into a url
-      const url = URL.createObjectURL(blob);
-
-      newMsg.images!.push({
-        image: url,
-        seed: artifact.seed,
-      });
-    }
+    newMsg.images = data;
 
     newMsg.loading = false;
     newMsg.buttons = [

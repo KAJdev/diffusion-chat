@@ -1,7 +1,31 @@
 import { Message } from "./Message";
 import { PromptBook } from "./PromptBook";
 
-export function Button({ btn, message }: { btn: Button; message: Message }) {
+function saveImage(image: string, name: string) {
+  // download image from external URL
+  fetch(image)
+    .then((res) => res.blob())
+    .then((blob) => {
+      // create blob link to download
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const link = document.createElement("a");
+      link.setAttribute("download", `${name}.png`);
+      link.setAttribute("href", url);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    });
+}
+
+export function Button({
+  btn,
+  message,
+  selectedImage,
+}: {
+  btn: Button;
+  message: Message;
+  selectedImage: number;
+}) {
   const addPrompt = PromptBook.use((state) => state.addPrompt);
 
   return (
@@ -11,12 +35,19 @@ export function Button({ btn, message }: { btn: Button; message: Message }) {
         if (btn.id == "regenerate") {
           Message.sendPromptMessage(message.prompt, message.modifiers);
         } else if (btn.id == "save") {
-          message.images?.forEach((image) => {
-            const link = document.createElement("a");
-            link.href = image.image;
-            link.download = `image-${new Date().getTime()}.png`;
-            link.click();
-          });
+          if (selectedImage === -1) {
+            message.images.forEach((image, i) =>
+              saveImage(
+                image.image,
+                `${message.prompt.replace(/[^a-zA-Z0-9]/g, "_")}-${i}`
+              )
+            );
+          } else {
+            saveImage(
+              message.images[selectedImage].image,
+              message.prompt.replace(/[^a-zA-Z0-9]/g, "_")
+            );
+          }
         } else if (btn.id == "remix") {
           Message.sendPromptMessage(message.prompt);
         } else if (btn.id == "save_prompt" && message.prompt) {

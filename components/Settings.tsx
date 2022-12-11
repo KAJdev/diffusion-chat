@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from "framer-motion";
 import create from "zustand";
 
 export function Settings() {
@@ -19,27 +20,27 @@ export function Settings() {
         <div className="flex flex-row justify-between">
           <h1 className="text-white text-sm font-semibold">Model</h1>
         </div>
-        <div className="flex flex-row gap-2">
-          {["v1.5", "v2.1", "v2.1 large"].map((model) => (
+        <div className="flex flex-row gap-2 p-1 rounded-lg bg-white/5 border border-white/10 w-fit">
+          {["1.5", "2.1", "2.1 large"].map((model) => (
             <button
               key={model}
-              className={`rounded flex justify-center font-semibold px-2 items-center ${
+              className={`rounded flex justify-center relative font-semibold px-2 items-center ${
                 settings.model ===
-                (model === "v1.5"
+                (model === "1.5"
                   ? "stable-diffusion-v1-5"
-                  : model === "v2.1"
+                  : model === "2.1"
                   ? "stable-diffusion-512-v2-1"
                   : "stable-diffusion-768-v2-1")
-                  ? "bg-white/10 text-white"
+                  ? "text-white"
                   : "hover:text-white text-white/75"
               }`}
               onClick={() => {
                 setSettings({
                   ...settings,
                   model:
-                    model === "v1.5"
+                    model === "1.5"
                       ? "stable-diffusion-v1-5"
-                      : model === "v2.1"
+                      : model === "2.1"
                       ? "stable-diffusion-512-v2-1"
                       : "stable-diffusion-768-v2-1",
                   width: Math.max(
@@ -53,6 +54,20 @@ export function Settings() {
                 });
               }}
             >
+              {settings.model ===
+                (model === "1.5"
+                  ? "stable-diffusion-v1-5"
+                  : model === "2.1"
+                  ? "stable-diffusion-512-v2-1"
+                  : "stable-diffusion-768-v2-1") &&
+                open && (
+                  <motion.div
+                    layoutId="model"
+                    transition={{ duration: 0.1 }}
+                    className="absolute inset-0 rounded bg-white/10"
+                    initial={false}
+                  />
+                )}
               {model}
             </button>
           ))}
