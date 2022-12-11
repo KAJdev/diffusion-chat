@@ -74,8 +74,18 @@ export function ChatBar() {
                   // @ts-ignore
                   e.target.blur();
                 }
-              } else if (e.key === "up" && prompt === "") {
-                setPrompt(history[Object.keys(history).length - 1].prompt);
+              } else if (
+                e.key === "ArrowUp" &&
+                !prompt &&
+                Object.keys(history).length > 0
+              ) {
+                setPrompt(
+                  Object.values(history).sort(
+                    (a, b) => b.timestamp - a.timestamp
+                  )[0].prompt
+                );
+
+                e.preventDefault();
               }
             }}
             style={{
