@@ -18,22 +18,25 @@ export function Message({ id }: { id: string }) {
     <div className={`my-2 w-full hover:bg-black/10`}>
       <div
         className={`mx-auto max-w-[60rem] px-2 lg:px-0 flex flex-col w-full ${
-          message.type === "you" ? "items-end" : "items-start"
+          message.type === "you" ? "items-start" : "items-end"
         }`}
       >
-        <div className="flex flex-row gap-2 items-center">
-          {message.timestamp && (
-            <p className="text-white/30 self-end">
-              {new Date(message.timestamp).toLocaleTimeString()}
-            </p>
-          )}
+        <div className="flex flex-row gap-2 items-end h-fit">
           <h1 className="font-semibold text-white">
             {message.type === "you" ? "You" : "Stable Diffusion"}
           </h1>
-          {message.modifiers && message.type !== "you" && (
-            <Wand2 className="text-white/30" size={16} />
+          {message.timestamp && (
+            <p className="text-white/30 text-xs pb-0.5">
+              {new Date(message.timestamp).toLocaleTimeString()}
+            </p>
+          )}
+          {message.modifiers && (
+            <Wand2 className="text-white/30 pb-[3px]" size={16} />
           )}
         </div>
+        {message.prompt && message.type === "you" && (
+          <p className="text-white/75 text-left break-word">{message.prompt}</p>
+        )}
         {message.images && message.settings && message.images.length > 0 && (
           <div
             className={`flex flex-row gap-2 overflow-hidden flex-wrap max-w-full`}
@@ -50,11 +53,6 @@ export function Message({ id }: { id: string }) {
               />
             ))}
           </div>
-        )}
-        {message.prompt && message.type === "you" && (
-          <p className="text-white/75 text-right break-word">
-            {message.prompt}
-          </p>
         )}
         {message.error && <p className="text-red-500">{message.error}</p>}
         {message.loading && message.images && message.images.length === 0 && (
@@ -157,31 +155,17 @@ export namespace Message {
 
     ChatBar.use.getState().setPrompt("");
 
-    MessageList.use.getState().addMessage({
-      type: MessageType.YOU,
-      id: Message.makeId(),
-      prompt: prompt,
-      modifiers: modifiers || undefined,
-      timestamp: Date.now(),
-      loading: false,
-      buttons: [],
-      error: null,
-      images: [],
-      settings: null,
-    });
-
-    await new Promise((r) => setTimeout(r, 400));
     const uid = makeId();
     const newMsg: Message = {
-      type: MessageType.STABLE_DIFFUSION,
+      type: MessageType.YOU,
+      id: uid,
       prompt: prompt,
       modifiers: modifiers || undefined,
-      images: [],
+      timestamp: Date.now(),
       loading: true,
       buttons: [],
-      id: uid,
-      timestamp: Date.now(),
       error: null,
+      images: [],
       settings: settings,
     };
     MessageList.use.getState().addMessage(newMsg);
