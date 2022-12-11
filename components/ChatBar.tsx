@@ -74,6 +74,8 @@ export function ChatBar() {
                   // @ts-ignore
                   e.target.blur();
                 }
+              } else if (e.key === "arrowup" && prompt === "") {
+                setPrompt(history[Object.keys(history).length - 1].prompt);
               }
             }}
             style={{
