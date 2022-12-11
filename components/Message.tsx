@@ -170,23 +170,29 @@ export namespace Message {
     };
     MessageList.use.getState().addMessage(newMsg);
 
-    const res = await fetch("https://api.diffusion.chat/image", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        prompt: prompt,
-        modifiers,
-        model: settings.model,
-        width: settings.width,
-        height: settings.height,
-        count: settings.count,
-        steps: settings.steps,
-        scale: settings.scale,
-      }),
-    });
+    let res = null;
 
-    if (!res.ok) {
-      switch (res.status) {
+    try {
+      res = await fetch("https://api.diffusion.chat/image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: prompt,
+          modifiers,
+          model: settings.model,
+          width: settings.width,
+          height: settings.height,
+          count: settings.count,
+          steps: settings.steps,
+          scale: settings.scale,
+        }),
+      });
+    } catch (e) {
+      console.log(e);
+    }
+
+    if (!res || !res.ok) {
+      switch (res?.status) {
         case 400:
           newMsg.error = "Bad request";
           break;
