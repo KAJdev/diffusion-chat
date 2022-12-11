@@ -1,4 +1,4 @@
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, X } from "lucide-react";
 import React from "react";
 import create from "zustand";
 import { ChatBar } from "./ChatBar";
@@ -59,7 +59,7 @@ export function PromptBook() {
           {prompts.map((prompt, i) => (
             <button
               key={prompt}
-              className="flex flex-row justify-between text-white/75 hover:text-white items-center p-2 border-b last-of-type:border-none border-white/10 w-full gap-2"
+              className="flex flex-row justify-between group relative text-white/75 hover:text-white items-center border-b last-of-type:border-none pb-2 last-of-type:pb-0 border-white/10 w-full"
               onClick={() => {
                 setPrompt(prompt);
                 setOpen(false);
@@ -69,13 +69,13 @@ export function PromptBook() {
                 {prompt}
               </p>
               <div
-                className="flex justify-center shrink-0 items-center w-6 h-6 hover:bg-white/10 hover:text-white text-white/50 rounded duration-100"
+                className="flex justify-center absolute top-0 right-0 items-center w-6 h-6 hover:bg-[#32363d] text-red-500 hover:text-bold bg-[#292d33] opacity-0 group-hover:opacity-100 rounded-full duration-100"
                 onClick={(e) => {
                   e.stopPropagation();
                   deletePrompt(prompt);
                 }}
               >
-                <Trash2 className="w-4 h-4" />
+                <X className="w-4 h-4" />
               </div>
             </button>
           ))}
