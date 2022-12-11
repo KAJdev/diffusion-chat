@@ -9,6 +9,12 @@ export default function Home() {
   const mainConatiner = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
+    if (mainConatiner.current && inputContainer.current) {
+      mainConatiner.current.style.marginTop = `calc(100vh - ${
+        inputContainer.current.offsetHeight + 24
+      }px - ${mainConatiner.current.offsetHeight + 24}px)`;
+    }
+
     const ubnsub = MessageList.use.subscribe(() => {
       setTimeout(() => {
         if (mainConatiner.current && inputContainer.current) {
