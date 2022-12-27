@@ -1,9 +1,9 @@
-import { Wand2 } from "lucide-react";
+import { Frown, Smile, Wand2 } from "lucide-react";
 import React from "react";
 import { Button } from "./Button";
 import { ChatBar } from "./ChatBar";
 import { Image } from "./Image";
-import { MessageList } from "./MessageList";
+import { MessageList, sessionID, makeId } from "./MessageList";
 import { PromptBook } from "./PromptBook";
 import { PromptEngine } from "./PromptEngine";
 import { Settings } from "./Settings";
@@ -15,12 +15,46 @@ export function Message({ id }: { id: string }) {
   const savedPrompts = PromptBook.use((state) => state.prompts);
 
   return (
-    <div className={`my-2 w-full hover:bg-black/10`}>
+    <div className={`my-2 w-full hover:bg-black/10 group`}>
       <div
-        className={`mx-auto max-w-[60rem] px-2 lg:px-0 flex flex-col w-full ${
+        className={`mx-auto max-w-[60rem] relative px-2 lg:px-0 flex flex-col w-full ${
           message.type === "you" ? "items-start" : "items-end"
         }`}
       >
+        {message.images && message.images.length > 0 && (
+          <div className="absolute hidden group-hover:flex top-0 -translate-y-[50%] duration-200 right-0 hover:drop-shadow-lg flex-row rounded overflow-hidden bg-chatbox">
+            <div
+              onClick={() => Message.rateMessage(message, 1)}
+              className={`p-1.5 border-r border-[#31363f] last-of-type:border-transparent duration-200 cursor-pointer ${
+                message.rating < 3
+                  ? "bg-white/[7%] text-red-300"
+                  : "text-red-300/30 hover:text-red-300 hover:bg-white/5"
+              }`}
+            >
+              <Frown size={24} />
+            </div>
+            <div
+              onClick={() => Message.rateMessage(message, 5)}
+              className={`p-1.5 border-r border-[#31363f] last-of-type:border-transparent duration-200 cursor-pointer ${
+                message.rating > 3
+                  ? "bg-white/[7%] text-green-300"
+                  : "text-green-300/30 hover:text-green-300 hover:bg-white/5"
+              }`}
+            >
+              <Smile size={24} />
+            </div>
+          </div>
+        )}
+        {message.rating !== 3 && (
+          <div className="absolute top-0 right-0 block group-hover:hidden">
+            {message.rating < 3 && (
+              <Frown className="text-red-300/30" size={24} />
+            )}
+            {message.rating > 3 && (
+              <Smile className="text-green-300/30" size={24} />
+            )}
+          </div>
+        )}
         <div className="flex flex-row gap-2 items-end h-fit">
           <h1 className="font-semibold text-white">
             {message.type === "you" ? "You" : "Stable Diffusion"}
@@ -105,31 +139,54 @@ export type Message = {
   error: string | null;
   images: Artifact[];
   settings: Settings | null;
+  rating: number;
 };
 
 export type Artifact = {
   image: string;
   seed: number;
+  id: string;
 };
 
 export namespace Message {
-  export const makeId = () => {
-    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
-      /[xy]/g,
-      function (c) {
-        var r = (Math.random() * 16) | 0,
-          v = c == "x" ? r : (r & 0x3) | 0x8;
-        return v.toString(16);
-      }
-    );
-  };
-
   export const b64toBlob = (b64Data: string, contentType = "") => {
     // Decode the base64 string into a new Buffer object
     const buffer = Buffer.from(b64Data, "base64");
 
     // Create a new blob object from the buffer
     return new Blob([buffer], { type: contentType });
+  };
+
+  export const rateMessage = async (message: Message, rating: number) => {
+    MessageList.use.setState((state) => {
+      const newMessages = { ...state.messages };
+      newMessages[message.id].rating = rating;
+      return { ...state, messages: newMessages };
+    });
+
+    let res = null;
+    try {
+      res = await fetch("https://api.diffusion.chat/rate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ids: message.images.map((img) => img.id),
+          rating,
+        }),
+      });
+    } catch (e) {
+      console.log(e);
+    }
+
+    if (!res || !res.ok) {
+      MessageList.use.setState((state) => {
+        const newMessages = { ...state.messages };
+        newMessages[message.id].rating = 3;
+        return { ...state, messages: newMessages };
+      });
+    } else {
+      console.log("rated", res);
+    }
   };
 
   export const sendPromptMessage = async (
@@ -167,6 +224,7 @@ export namespace Message {
       error: null,
       images: [],
       settings: settings,
+      rating: 3,
     };
     MessageList.use.getState().addMessage(newMsg);
 
@@ -185,6 +243,7 @@ export namespace Message {
           count: settings.count,
           steps: settings.steps,
           scale: settings.scale,
+          session: sessionID,
         }),
       });
     } catch (e) {
