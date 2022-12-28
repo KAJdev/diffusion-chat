@@ -21,7 +21,7 @@ export function Settings() {
           <h1 className="text-white text-sm font-semibold">Model</h1>
         </div>
         <div className="flex flex-row gap-2 p-1 rounded-lg bg-white/5 border border-white/10 w-fit">
-          {["1.5", "2.1", "2.1 large"].map((model) => (
+          {["1.5", "2.1", "2.1 large", "anime"].map((model) => (
             <button
               key={model}
               className={`rounded flex justify-center relative font-semibold px-2 items-center ${
@@ -30,7 +30,9 @@ export function Settings() {
                   ? "stable-diffusion-v1-5"
                   : model === "2.1"
                   ? "stable-diffusion-512-v2-1"
-                  : "stable-diffusion-768-v2-1")
+                  : model === "2.1 large"
+                  ? "stable-diffusion-768-v2-1"
+                  : "anything-v3.0")
                   ? "text-white"
                   : "hover:text-white text-white/75"
               }`}
@@ -42,7 +44,9 @@ export function Settings() {
                       ? "stable-diffusion-v1-5"
                       : model === "2.1"
                       ? "stable-diffusion-512-v2-1"
-                      : "stable-diffusion-768-v2-1",
+                      : model === "2.1 large"
+                      ? "stable-diffusion-768-v2-1"
+                      : "anything-v3.0",
                   width: Math.max(
                     model === "v2.1 large" ? 768 : 512,
                     settings.width
@@ -59,7 +63,9 @@ export function Settings() {
                   ? "stable-diffusion-v1-5"
                   : model === "2.1"
                   ? "stable-diffusion-512-v2-1"
-                  : "stable-diffusion-768-v2-1") &&
+                  : model === "2.1 large"
+                  ? "stable-diffusion-768-v2-1"
+                  : "anything-v3.0") &&
                 open && (
                   <motion.div
                     layoutId="model"
@@ -168,7 +174,8 @@ export type Settings = {
   model:
     | "stable-diffusion-v1-5"
     | "stable-diffusion-512-v2-1"
-    | "stable-diffusion-768-v2-1";
+    | "stable-diffusion-768-v2-1"
+    | "anything-v3.0";
   width: number;
   height: number;
   count: number;

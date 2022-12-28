@@ -148,6 +148,26 @@ export type Artifact = {
   id: string;
 };
 
+const SURE_ANIME_WORDS = [
+  "1girl",
+  "2girls",
+  "highres",
+  "looking at viewer",
+  "looking_at_viewer",
+];
+
+const POSSIBLE_ANIME_WORDS = [
+  "breasts",
+  "skirt",
+  "blush",
+  "smile",
+  "solo",
+  "simple background",
+  "simple_background",
+  "multiple girls",
+  "multiple_girls",
+];
+
 export namespace Message {
   export const b64toBlob = (b64Data: string, contentType = "") => {
     // Decode the base64 string into a new Buffer object
@@ -231,21 +251,41 @@ export namespace Message {
     let res = null;
 
     try {
-      res = await fetch("https://api.diffusion.chat/image", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prompt: prompt,
-          modifiers,
-          model: settings.model,
-          width: settings.width,
-          height: settings.height,
-          count: settings.count,
-          steps: settings.steps,
-          scale: settings.scale,
-          session: sessionID,
-        }),
-      });
+      if (
+        settings.model == "anything-v3.0" ||
+        SURE_ANIME_WORDS.some((word) => prompt.includes(word)) ||
+        POSSIBLE_ANIME_WORDS.filter((word) => prompt.includes(word)).length >= 3
+      ) {
+        res = await fetch("https://api.diffusion.chat/anime", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prompt: prompt,
+            width: 512,
+            height: 512,
+            count: 4,
+            steps: settings.steps,
+            scale: settings.scale,
+            session: sessionID,
+          }),
+        });
+      } else {
+        res = await fetch("https://api.diffusion.chat/image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prompt: prompt,
+            modifiers,
+            model: settings.model,
+            width: settings.width,
+            height: settings.height,
+            count: settings.count,
+            steps: settings.steps,
+            scale: settings.scale,
+            session: sessionID,
+          }),
+        });
+      }
     } catch (e) {
       console.log(e);
     }
