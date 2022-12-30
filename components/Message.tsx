@@ -230,6 +230,10 @@ export namespace Message {
       }
     }
 
+    if (!settings.modify) {
+      modifiers = undefined;
+    }
+
     ChatBar.use.getState().setPrompt("");
 
     const uid = makeId();

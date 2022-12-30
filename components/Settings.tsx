@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
+import { Check } from "lucide-react";
 import create from "zustand";
 
 export function Settings() {
@@ -166,6 +167,45 @@ export function Settings() {
           }}
         />
       </div>
+
+      <div
+        className="flex flex-row justify-between cursor-pointer select-none"
+        onClick={() => {
+          setSettings({
+            ...settings,
+            modify: !settings.modify,
+          });
+        }}
+      >
+        <div className="flex flex-col gap-0.5">
+          <h1 className="text-white text-sm font-semibold">Prompt Magic</h1>
+          <p className="text-white/50 text-[0.65rem]">
+            Adds modifiers and negative prompts to your generations
+          </p>
+        </div>
+        <div className="relative w-5 h-5">
+          {settings.modify && (
+            <Check
+              strokeWidth={4}
+              size={20}
+              className="absolute p-0.5 pointer-events-none inset-0 mx-auto my-auto text-settingsPanel"
+            />
+          )}
+          <input
+            type="checkbox"
+            className={`w-5 h-5 rounded appearance-none cursor-pointer ${
+              settings.modify ? "bg-[#99c8ff]" : "bg-white/10"
+            }`}
+            checked={settings.modify}
+            onChange={(e) => {
+              setSettings({
+                ...settings,
+                modify: e.target.checked,
+              });
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 }
@@ -181,6 +221,7 @@ export type Settings = {
   count: number;
   steps: number;
   scale: number;
+  modify: boolean;
 };
 
 export type SettingsState = {
@@ -200,6 +241,7 @@ export namespace Settings {
       count: 4,
       steps: 30,
       scale: 7,
+      modify: true,
     } as Settings,
     setSettings: (settings: Settings) =>
       set((state: SettingsState) => ({
