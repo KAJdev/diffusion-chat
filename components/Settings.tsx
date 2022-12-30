@@ -49,11 +49,11 @@ export function Settings() {
                       : "anything-v3.0",
                   width: Math.max(
                     model === "v2.1 large" ? 768 : 512,
-                    settings.width
+                    Math.min(model === "anime" ? 768 : 1024, settings.width)
                   ),
                   height: Math.max(
                     model === "v2.1 large" ? 768 : 512,
-                    settings.height
+                    Math.min(model === "anime" ? 768 : 1024, settings.height)
                   ),
                 });
               }}
@@ -91,7 +91,7 @@ export function Settings() {
           type="range"
           className="w-full h-2 bg-white/10 rounded-full appearance-none"
           min={settings.model === "stable-diffusion-768-v2-1" ? 768 : 512}
-          max={1024}
+          max={settings.model === "anything-v3.0" ? 768 : 1024}
           step={64}
           value={settings.width}
           onChange={(e) => {

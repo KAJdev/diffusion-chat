@@ -261,8 +261,8 @@ export namespace Message {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             prompt: prompt,
-            width: 512,
-            height: 512,
+            width: settings.width,
+            height: settings.height,
             count: 4,
             steps: settings.steps,
             scale: settings.scale,
@@ -315,6 +315,19 @@ export namespace Message {
 
     const data = await res.json();
     newMsg.images = data;
+
+    if (data.length == 0) {
+      newMsg.error = "No results";
+      newMsg.loading = false;
+      newMsg.buttons = [
+        {
+          text: "Retry",
+          id: "regenerate",
+        },
+      ];
+      MessageList.use.getState().editMessage(uid, newMsg);
+      return;
+    }
 
     newMsg.loading = false;
     newMsg.buttons = [
